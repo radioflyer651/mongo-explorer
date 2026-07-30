@@ -17,7 +17,7 @@ Open [mongo-explorer.code-workspace](mongo-explorer.code-workspace) in VS Code, 
 | Where you press F5 | What happens |
 |---|---|
 | **The workspace file** → pick *Mongo Explorer: server + client* | Starts both, opens a browser with the debugger attached |
-| A file in **mongo-explorer-server** | Starts the API on `127.0.0.1:2701` with a debugger attached |
+| A file in **mongo-explorer-server** | Starts the API on `127.0.0.1:27050` with a debugger attached |
 | A file in **mongo-explorer-client** | Runs `ng serve`, waits until it's actually listening, then opens the browser at `localhost:27100` |
 
 Breakpoints work directly in `.ts` files on both sides. Stopping either half of the compound stops
@@ -26,7 +26,7 @@ both, so ports are never left held.
 Command line equivalents:
 
 ```bash
-cd mongo-explorer-server && npm start     # API, port 2701
+cd mongo-explorer-server && npm start     # API, port 27050
 cd mongo-explorer-client && npm start     # UI,  port 27100
 ```
 
@@ -61,10 +61,11 @@ folders at once.
 | Service | Port |
 |---|---|
 | Angular dev server | `27100` |
-| Express / Socket.IO | `2701` (bound to `127.0.0.1`) |
+| Express / Socket.IO | `27050` (bound to `127.0.0.1`) |
 
 Both echo MongoDB's `27017` so they're easy to remember, and neither is a default that collides
-with other local projects.
+with other local projects. `2701` was the original choice but collides with `CmRcService` (SCCM
+Remote Control), which auto-starts on corporate-managed Windows machines — `27050` avoids it.
 
 The server binds the loopback interface only. It's single-user by design and must not be reachable
 from the network — that's also why the MCP endpoint carries no auth token.

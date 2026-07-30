@@ -12,7 +12,7 @@
 └──────────────┬───────────────┘
                │ HTTPS (JWT app auth) + Socket.IO
 ┌──────────────▼───────────────┐
-│  Node / Express (server)     │   port 2701 (dev)
+│  Node / Express (server)     │   port 27050 (dev)
 │  ┌────────────────────────┐  │
 │  │ Route factories        │  │  thin: validate, delegate, shape response
 │  ├────────────────────────┤  │
@@ -76,10 +76,11 @@ mechanism. There is deliberately **no** implicit link between the app JWT and an
 | Service | Port | Configured in |
 |---|---|---|
 | Angular dev server | `27100` | `angular.json` → `serve.configurations.development.port` |
-| Express / Socket.IO | `2701` | `app-config.json` → `serverConfig.port` (env-var overridable) |
+| Express / Socket.IO | `27050` | `app-config.json` → `serverConfig.port` (env-var overridable) |
 
 Both numbers deliberately reference MongoDB's `27017`. Neither collides with existing local projects
-(d-talk uses `54647` / `1062`).
+(d-talk uses `54647` / `1062`). `2701` was the original pick but collides with `CmRcService` (SCCM
+Remote Control), which listens on it by default on corporate-managed Windows machines.
 
 **Internal database:** `mongo-explorer` on the shared instance at `mongo.example.com:27017`. This
 is where saved connections, users, and preferences live — it is *not* a database the user browses.

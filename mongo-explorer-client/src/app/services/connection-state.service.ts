@@ -7,6 +7,7 @@ import {
     ConnectionStatus,
 } from '../../model/shared-models/connections/connection-state.model';
 import {
+    SavedConnection,
     SaveConnectionRequest,
     SavedConnectionListing,
 } from '../../model/shared-models/connections/saved-connection.model';
@@ -22,6 +23,7 @@ export class ConnectionStateService {
     private readonly _reloadConnections = new Subject<void>();
     private readonly _statuses = new BehaviorSubject<Map<string, ConnectionStatus>>(new Map());
     private readonly _activeConnectionId = new BehaviorSubject<ObjectId | undefined>(undefined);
+    private readonly _editRequest = new Subject<ObjectId>();
 
     /** Saved connections, reloaded on demand. */
     connectionListing$!: Observable<SavedConnectionListing[]>;
@@ -31,6 +33,9 @@ export class ConnectionStateService {
 
     /** The connection currently in use. */
     readonly activeConnectionId$: Observable<ObjectId | undefined> = this._activeConnectionId.asObservable();
+
+    /** Emits when something (a command, a list row) asks to edit a connection. */
+    readonly editRequest$: Observable<ObjectId> = this._editRequest.asObservable();
 
     /** Wires the reload stream. */
     private initialize(): void {
@@ -81,6 +86,16 @@ export class ConnectionStateService {
         const next = new Map(this._statuses.value);
         next.set(String(status.connectionId), status);
         this._statuses.next(next);
+    }
+
+    /** Requests that the editor open for an existing connection. */
+    requestEdit(connectionId: ObjectId): void {
+        this._editRequest.next(connectionId);
+    }
+
+    /** Reads one connection's full configuration, for populating the editor. */
+    getConnection(connectionId: ObjectId): Observable<SavedConnection> {
+        return this.api.getConnection(connectionId);
     }
 
     /** Creates or updates a connection, then reloads the list. */

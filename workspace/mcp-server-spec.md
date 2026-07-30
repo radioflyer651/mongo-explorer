@@ -134,7 +134,7 @@ no excuse for a one-way door here.
 └───────────┬──────────────┘
             │ MCP — Streamable HTTP (127.0.0.1) or stdio shim
 ┌───────────▼──────────────────────────────────────────┐
-│ Express server (port 2701)                           │
+│ Express server (port 27050)                          │
 │  ┌────────────────────────────────────────────────┐  │
 │  │ src/mcp/                                       │  │
 │  │  mcp-server.ts        tool + resource registry │  │
@@ -165,7 +165,7 @@ duplicated auth, no second place for `LiveConnection` lifecycles to live.
 
 | Transport | Use |
 |---|---|
-| **Streamable HTTP** at `http://127.0.0.1:2701/mcp` | Primary. Bound to loopback like the rest of the server. |
+| **Streamable HTTP** at `http://127.0.0.1:27050/mcp` | Primary. Bound to loopback like the rest of the server. |
 | **stdio shim** — `scripts/mcp-stdio-bridge.ts` | Thin adapter for clients that only speak stdio. Forwards to the HTTP endpoint; holds no logic of its own. |
 
 Both use the official `@modelcontextprotocol/sdk`. `[Judgment]` Verify the SDK's current transport and
@@ -616,7 +616,7 @@ has to reconcile by hand.
 For Claude Code:
 
 ```bash
-claude mcp add --transport http mongo-explorer http://127.0.0.1:2701/mcp
+claude mcp add --transport http mongo-explorer http://127.0.0.1:27050/mcp
 ```
 
 For clients requiring stdio, point at the bridge in [../scripts/](../scripts/). Verify both against the

@@ -77,10 +77,11 @@ Memorable, **non-default** ports, to avoid collisions with other tooling and oth
 | Service | Port | Configured in |
 |---|---|---|
 | Angular dev server | `27100` | `angular.json` → `serve.configurations.development.port` |
-| Express / Socket.IO | `2701` | `app-config.json` → `serverConfig.port`, env-var overridable |
+| Express / Socket.IO | `27050` | `app-config.json` → `serverConfig.port`, env-var overridable |
 
 Both echo MongoDB's `27017`. Neither is a default (`4200`), and neither collides with d-talk's
-`54647` / `1062` or multi-chat's ports.
+`54647` / `1062` or multi-chat's ports. `2701` was the original pick but collides with `CmRcService`
+(SCCM Remote Control), which listens on it by default on corporate-managed Windows machines.
 
 ### Environment & config files
 

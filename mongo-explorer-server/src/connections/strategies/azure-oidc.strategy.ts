@@ -9,7 +9,7 @@ import {
     IConnectionStrategy,
 } from '../connection-strategy';
 import { applyTransportOptions } from './connection-string.strategy';
-import { ConnectionStrategyKind } from '../../model/shared-models/connections/connection-strategy-kind.model';
+import { AzureOidcFlow, ConnectionStrategyKind } from '../../model/shared-models/connections/connection-strategy-kind.model';
 import { AzureOidcConfig, SavedConnection } from '../../model/shared-models/connections/saved-connection.model';
 import { AcquiredToken, IOidcTokenProvider } from '../oidc/oidc-token-provider';
 
@@ -49,6 +49,13 @@ export class AzureOidcStrategy implements IConnectionStrategy {
         '*.documents.azure.com',
     ];
 
+    /** Flows whose credential type is registered under an Entra app registration. */
+    private static readonly flowsNeedingClientId: readonly AzureOidcFlow[] = [
+        AzureOidcFlow.AuthorizationCode,
+        AzureOidcFlow.DeviceCode,
+        AzureOidcFlow.ClientCredentials,
+    ];
+
     validate(connection: SavedConnection): ConnectionValidationResult {
         const errors: ConnectionValidationError[] = [];
         const config = connection.config.azureOidc;
@@ -66,8 +73,11 @@ export class AzureOidcStrategy implements IConnectionStrategy {
             errors.push({ path: 'azureOidc.tenantId', message: 'A directory (tenant) id is required.' });
         }
 
-        if (!config.clientId?.trim()) {
-            errors.push({ path: 'azureOidc.clientId', message: 'An application (client) id is required.' });
+        if (!config.clientId?.trim() && AzureOidcStrategy.flowsNeedingClientId.includes(config.flow)) {
+            errors.push({
+                path: 'azureOidc.clientId',
+                message: 'An application (client) id is required for this sign-in method.',
+            });
         }
 
         if (!config.tokenResource?.trim()) {
@@ -109,6 +119,17 @@ export class AzureOidcStrategy implements IConnectionStrategy {
         context.report(`Acquiring an Entra ID token using ${provider.displayName}.`);
         const initialToken = await provider.acquireToken(config, context);
 
+        /* The driver runs an entirely different SASL conversation depending on which
+           of these two keys is set: OIDC_HUMAN_CALLBACK negotiates a two-step
+           exchange (an empty first saslStart requesting IdP metadata from the
+           server, then the JWT on the second step), while OIDC_CALLBACK sends the
+           JWT immediately on the first message. A non-interactive credential type
+           (Azure CLI, managed identity, client secret) has no IdP metadata
+           round-trip to negotiate, and a server that only implements the one-step
+           form will reject the empty first message — surfacing as a server-side
+           "JWT missing" error that has nothing to do with the token itself. */
+        const callbackKey = provider.isInteractive ? 'OIDC_HUMAN_CALLBACK' : 'OIDC_CALLBACK';
+
         const options: MongoClientOptions = {
             authMechanism: 'MONGODB-OIDC',
             authMechanismProperties: {
@@ -120,7 +141,7 @@ export class AzureOidcStrategy implements IConnectionStrategy {
                 /* We bring our own token acquisition rather than relying on the
                    driver's built-in Azure environment, which targets workload
                    identity rather than a human signing in. */
-                OIDC_HUMAN_CALLBACK: this.createCallback(config, context, provider, initialToken),
+                [callbackKey]: this.createCallback(config, context, provider, initialToken),
             } as MongoClientOptions['authMechanismProperties'],
         };
 
@@ -131,8 +152,14 @@ export class AzureOidcStrategy implements IConnectionStrategy {
         applyTransportOptions(options, connection.config.transport);
         options.tls = connection.config.transport?.useTls ?? true;
 
+        /* Azure Cosmos DB for MongoDB (vCore) is addressed via SRV records and has
+           no fixed port — the connection string Azure's own portal generates is
+           mongodb+srv://<host>/, never mongodb://<host>:<port>. Only build the
+           direct, ported form when a port was explicitly configured. */
+        const uri = config.port ? `mongodb://${config.host}:${config.port}` : `mongodb+srv://${config.host}`;
+
         return {
-            uri: `mongodb://${config.host}:${config.port}`,
+            uri,
             options,
             defaultDatabase: config.defaultDatabase,
             credentialExpiresAt: initialToken.expiresAt,

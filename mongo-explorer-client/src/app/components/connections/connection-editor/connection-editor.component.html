@@ -3,10 +3,16 @@
 <div class="connection-editor panel">
     <div class="panel-header">
         <i class="pi pi-server"></i>
-        <span>New connection</span>
+        <span>{{ connectionId() ? 'Edit connection' : 'New connection' }}</span>
     </div>
 
     <div class="editor-body">
+        @if (isLoading()) {
+            <div class="oidc-note tiny">
+                <i class="pi pi-spin pi-spinner"></i> Loading connection…
+            </div>
+        }
+
         <label class="field">
             <span class="field-label tiny">Name</span>
             <input type="text" [ngModel]="name()" (ngModelChange)="name.set($event)" placeholder="My cluster" />
@@ -68,8 +74,9 @@
                                placeholder="mycluster.mongocluster.cosmos.azure.com" />
                     </label>
                     <label class="field narrow">
-                        <span class="field-label tiny">Port</span>
-                        <input type="number" [ngModel]="oidcPort()" (ngModelChange)="oidcPort.set($event)" />
+                        <span class="field-label tiny">Port (optional)</span>
+                        <input type="number" [ngModel]="oidcPort()" (ngModelChange)="oidcPort.set($event)"
+                               placeholder="blank = SRV, e.g. vCore" />
                     </label>
                 </div>
 
@@ -140,7 +147,8 @@
         @if (needsSecret()) {
             <label class="field">
                 <span class="field-label tiny">Password or secret</span>
-                <input type="password" [ngModel]="secret()" (ngModelChange)="secret.set($event)" />
+                <input type="password" [ngModel]="secret()" (ngModelChange)="secret.set($event)"
+                       [placeholder]="hasExistingSecret() ? 'Leave blank to keep the existing secret' : ''" />
             </label>
 
             <label class="checkbox-field">

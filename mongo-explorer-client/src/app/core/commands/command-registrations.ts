@@ -66,6 +66,24 @@ export function registerAppCommands(): void {
             },
         },
         {
+            id: 'connection.edit',
+            label: 'Edit connection',
+            icon: ICONS.edit,
+            appliesTo: ['connection'],
+            group: CommandGroup.Connection,
+            order: 15,
+            mcp: 'never',
+            isVisible: () => true,
+            isEnabled: () => ENABLED,
+            execute: async context => {
+                if (context.kind !== 'connection') {
+                    return;
+                }
+
+                connections.requestEdit(context.connectionId);
+            },
+        },
+        {
             id: 'connection.disconnect',
             label: 'Disconnect',
             icon: ICONS.disconnect,

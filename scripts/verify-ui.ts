@@ -8,7 +8,7 @@
  * binding) built and served perfectly while doing nothing on click. Run this after
  * touching anything in the interaction path.
  *
- * Inputs: none. Expects the client on :27100 and the server on :2701 — start them with
+ * Inputs: none. Expects the client on :27100 and the server on :27050 — start them with
  * F5 (the "server + client" compound) or `npm start` in each project.
  * Setup: Microsoft Edge or Google Chrome installed, and Node 22+ for the global
  * WebSocket. No npm dependencies: this speaks the Chrome DevTools Protocol directly.
@@ -295,7 +295,7 @@ async function main(): Promise<void> {
 
     /* Fail early and clearly if the app is not up — otherwise every check fails and the
        report implies the interface is broken. */
-    for (const [label, url] of [['server', 'http://127.0.0.1:2701/api/health'], ['client', APP_URL]]) {
+    for (const [label, url] of [['server', 'http://127.0.0.1:27050/api/health'], ['client', APP_URL]]) {
         try {
             const response = await fetch(url);
 

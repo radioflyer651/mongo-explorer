@@ -4,10 +4,10 @@ export const environment = {
     isDevelopment: true,
 
     /** Base URL of the Mongo Explorer server. */
-    apiBaseUrl: 'http://127.0.0.1:2701',
+    apiBaseUrl: 'http://127.0.0.1:27050',
 
     /** Socket.IO endpoint. */
-    socketUrl: 'http://127.0.0.1:2701',
+    socketUrl: 'http://127.0.0.1:27050',
 
     /**
      * PrimeUI (PrimeNG) licence key. Empty until one is issued, which is why the

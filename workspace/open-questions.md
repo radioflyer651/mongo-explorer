@@ -71,7 +71,7 @@ that code doesn't.
 ## Deferrable
 
 ### 8. MCP endpoint authentication
-`[Judgment, deferred]` No auth token on `http://127.0.0.1:2701/mcp` in the initial version — anything
+`[Judgment, deferred]` No auth token on `http://127.0.0.1:27050/mcp` in the initial version — anything
 that can reach loopback on this machine can already read `app-config.json`, which holds the real
 credentials, so a token would be ceremony.
 

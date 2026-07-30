@@ -10,7 +10,7 @@ Every leaf can be overridden by an environment variable. Environment wins over t
 
 | Key | Type | Env var | Notes |
 |---|---|---|---|
-| `port` | number | `MONGO_EXPLORER_PORT` | Default `2701`. |
+| `port` | number | `MONGO_EXPLORER_PORT` | Default `27050`. |
 | `bindAddress` | string | `MONGO_EXPLORER_BIND_ADDRESS` | **Default `127.0.0.1`. Do not change this.** Mongo Explorer is single-user and must not be reachable from the network. Binding `0.0.0.0` exposes every saved connection to anything that can reach the host, and the MCP endpoint has no auth precisely because it is loopback-only. |
 
 ## mongo — the **Application Database**

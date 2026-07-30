@@ -11,7 +11,7 @@ Nothing here is committed until it appears in [../PROJECT_STATUS.md](../PROJECT_
 
 - [ ] Angular client installed and serving on `27100`, **zoneless** (`provideZonelessChangeDetection()`,
       no zone.js polyfill)
-- [ ] Express server compiling and listening on `2701`
+- [ ] Express server compiling and listening on `27050`
 - [ ] Inversify container, config loader, `MongoHelper` for the **Internal DB**
 - [ ] App auth: login, JWT, auth middleware, auth guard
 - [ ] Shared models folder wired on both sides

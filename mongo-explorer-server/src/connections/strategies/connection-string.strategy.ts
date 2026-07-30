@@ -32,6 +32,10 @@ export function applyTransportOptions(options: MongoClientOptions, transport: Tr
         options.retryWrites = transport.retryWrites;
     }
 
+    if (transport.maxIdleTimeMs !== undefined) {
+        options.maxIdleTimeMS = transport.maxIdleTimeMs;
+    }
+
     options.serverSelectionTimeoutMS = transport.serverSelectionTimeoutMs ?? 10_000;
 }
 

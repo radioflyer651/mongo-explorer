@@ -7,7 +7,14 @@ import { McpModeService } from '../mcp/mcp-mode.service';
 import { validateBody } from './middleware/validate-body.middleware';
 import { readObjectIdParam, sendError } from './route-helpers';
 import { ConnectionStrategyKind, AzureOidcFlow } from '../model/shared-models/connections/connection-strategy-kind.model';
-import { SaveConnectionRequest } from '../model/shared-models/connections/saved-connection.model';
+import { SavedConnection, SaveConnectionRequest } from '../model/shared-models/connections/saved-connection.model';
+
+/** Flows whose credential type is registered under an Entra app registration. */
+const AZURE_OIDC_FLOWS_NEEDING_CLIENT_ID: readonly AzureOidcFlow[] = [
+    AzureOidcFlow.AuthorizationCode,
+    AzureOidcFlow.DeviceCode,
+    AzureOidcFlow.ClientCredentials,
+];
 
 /** Schema for saving a connection. The envelope is validated strictly. */
 const saveConnectionSchema = z.object({
@@ -39,9 +46,9 @@ const saveConnectionSchema = z.object({
         azureOidc: z
             .object({
                 host: z.string().min(1),
-                port: z.number().int().min(1).max(65_535),
+                port: z.number().int().min(1).max(65_535).optional(),
                 tenantId: z.string().min(1),
-                clientId: z.string().min(1),
+                clientId: z.string().optional(),
                 flow: z.nativeEnum(AzureOidcFlow),
                 tokenResource: z.string().min(1),
                 allowedHosts: z.array(z.string()).min(1),
@@ -50,6 +57,15 @@ const saveConnectionSchema = z.object({
                 managedIdentityClientId: z.string().optional(),
                 defaultDatabase: z.string().optional(),
             })
+            /* Only the app-registration-backed flows need a client id — Azure CLI
+               and managed identity acquire tokens through a credential type that
+               never references one. */
+            .refine(
+                value =>
+                    !!value.clientId?.trim() ||
+                    !AZURE_OIDC_FLOWS_NEEDING_CLIENT_ID.includes(value.flow),
+                { message: 'An application (client) id is required for this sign-in method.', path: ['clientId'] }
+            )
             .optional(),
         x509: z
             .object({
@@ -67,6 +83,7 @@ const saveConnectionSchema = z.object({
                 tlsAllowInvalidCertificates: z.boolean().optional(),
                 retryWrites: z.boolean().optional(),
                 serverSelectionTimeoutMs: z.number().int().min(100).optional(),
+                maxIdleTimeMs: z.number().int().min(0).optional(),
             })
             .optional(),
     }),
@@ -100,6 +117,35 @@ export function createConnectionsRouter(
 
     router.get('/api/connections/statuses', (_req, res) => {
         res.json(connectionManager.getAllStatuses());
+    });
+
+    /* Must come after the static /strategies and /statuses routes above — as a
+       dynamic segment this would otherwise shadow both. */
+    router.get('/api/connections/:connectionId', async (req, res) => {
+        const connectionId = readObjectIdParam(req, res, 'connectionId');
+
+        if (!connectionId) {
+            return;
+        }
+
+        try {
+            const found = await savedConnections.getConnectionById(connectionId);
+
+            if (!found) {
+                res.status(404).json({ message: 'No such connection.' });
+                return;
+            }
+
+            /* The stored document carries encryptedSecret alongside the modeled
+               fields — never let it reach the client, even encrypted. */
+            const { encryptedSecret: _encryptedSecret, ...connection } = found as SavedConnection & {
+                encryptedSecret?: string;
+            };
+
+            res.json(connection);
+        } catch (error) {
+            sendError(res, error, 'Could not load the connection.');
+        }
     });
 
     router.post('/api/connections', validateBody(saveConnectionSchema), async (req, res) => {

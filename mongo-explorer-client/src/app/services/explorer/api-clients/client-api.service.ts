@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { ObjectId } from 'mongodb';
 import { ApiClientBase } from './api-client-base.service';
 import {
+    SavedConnection,
     SaveConnectionRequest,
     SavedConnectionListing,
 } from '../../../../model/shared-models/connections/saved-connection.model';
@@ -90,6 +91,14 @@ export class ClientApiService extends ApiClientBase {
     getConnections(): Observable<SavedConnectionListing[]> {
         return this.http.get<SavedConnectionListing[]>(
             this.url('/api/connections'),
+            this.optionsBuilder.withAuthorization()
+        );
+    }
+
+    /** Reads one connection's full, unredacted configuration (never its secret). */
+    getConnection(connectionId: ObjectId): Observable<SavedConnection> {
+        return this.http.get<SavedConnection>(
+            this.url(`/api/connections/${connectionId}`),
             this.optionsBuilder.withAuthorization()
         );
     }

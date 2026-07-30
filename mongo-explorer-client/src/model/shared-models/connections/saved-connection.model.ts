@@ -101,8 +101,13 @@ export interface AzureOidcConfig {
     /** Cluster host, typically <cluster>.mongocluster.cosmos.azure.com. */
     host: string;
 
-    /** Port the cluster listens on. */
-    port: number;
+    /**
+     * Port the cluster listens on. Omit for Azure Cosmos DB for MongoDB (vCore),
+     * which is addressed via SRV records (mongodb+srv://<host>) and has no fixed
+     * port — matches the connection string Azure's portal generates. Set this only
+     * for a direct, non-SRV deployment behind Entra ID.
+     */
+    port?: number;
 
     /** Entra ID directory (tenant) identifier. */
     tenantId: string;
@@ -176,6 +181,13 @@ export interface TransportOptions {
 
     /** Server selection timeout, in milliseconds. */
     serverSelectionTimeoutMs?: number;
+
+    /**
+     * Closes idle pooled connections after this many milliseconds. Azure recommends
+     * 120000 for Cosmos DB for MongoDB (vCore) to avoid the platform silently
+     * dropping long-idle connections ahead of the driver noticing.
+     */
+    maxIdleTimeMs?: number;
 }
 
 /**

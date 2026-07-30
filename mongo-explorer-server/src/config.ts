@@ -38,7 +38,7 @@ const ConfigToEnvMap = {
 /** Defaults used when app-config.json is absent, so a fresh clone can start. */
 const defaultConfig: IAppConfig = {
     serverConfig: {
-        port: 2701,
+        port: 27050,
         bindAddress: '127.0.0.1',
     },
     mongo: {

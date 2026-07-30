@@ -23,7 +23,7 @@ Azure OIDC is structurally complete and **unverified** — by design, there is n
 ## What runs
 
 ```bash
-# Server — port 2701, bound to 127.0.0.1
+# Server — port 27050, bound to 127.0.0.1
 cd mongo-explorer-server && npm start
 
 # Client — port 27100
@@ -155,7 +155,7 @@ Fixed by [context-menu.service.ts](mongo-explorer-client/src/app/core/commands/c
 
 | Decision | Reasoning |
 |---|---|
-| Ports `27100` / `2701` | Echo `27017`; no collision with d-talk or multi-chat |
+| Ports `27100` / `27050` | Echo `27017`; no collision with d-talk, multi-chat, or `CmRcService` |
 | Server binds `127.0.0.1` | Single-user by intent. One argument, and the most effective control in the codebase — it is also why the MCP endpoint needs no auth. |
 | Angular 22, not 20 | PrimeNG 22 requires it, and the standards specify zoneless. Global CLI is 20; used `npx @angular/cli@22`. |
 | `bcryptjs` over `bcrypt` | Native builds fail on Windows without VS build tools. Pure-JS, same API. Deviation from the playbook, noted. |

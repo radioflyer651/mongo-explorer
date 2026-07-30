@@ -51,7 +51,7 @@ Mongo host (it says `.run`; correct is **`.com`**).
 
 ## Cross-cutting decisions already made
 
-- **Ports:** client `27100`, server `2701`.
+- **Ports:** client `27100`, server `27050`.
 - **Internal DB:** `mongo-explorer` on `mongo.example.com:27017`.
 - **Angular is zoneless.** `provideZonelessChangeDetection()`, no zone.js polyfill. Services stay
   RxJS; components consume state as signals via `toSignal()`.

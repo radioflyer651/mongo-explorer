@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, computed, inject, signal } from '@angular/core';
+import { ObjectId } from 'mongodb';
+import { takeUntil } from 'rxjs';
 import { ExplorerSidebarComponent } from './components/explorer/explorer-sidebar/explorer-sidebar.component';
 import { CollectionDetailComponent } from './components/explorer/collection-detail/collection-detail.component';
 import { ConnectionEditorComponent } from './components/connections/connection-editor/connection-editor.component';
@@ -12,6 +14,7 @@ import { ShellPanelComponent } from './components/shell/shell-panel/shell-panel.
 import { ComponentBase } from './components/component-base/component-base.component';
 import { WorkspaceService } from './services/workspace.service';
 import { AiSessionService } from './services/ai-session.service';
+import { ConnectionStateService } from './services/connection-state.service';
 import { ExplorerDataService } from './services/explorer/explorer-data.service';
 import { CommandRegistry } from './core/commands/command-registry.service';
 import { ContextMenuService } from './core/commands/context-menu.service';
@@ -51,14 +54,23 @@ export class App extends ComponentBase {
         registerAppCommands();
         registerDocumentViews();
         registerCellRenderers();
+
+        this.connections.editRequest$.pipe(takeUntil(this.ngDestroy$)).subscribe(connectionId => {
+            this.editingConnectionId.set(connectionId);
+            this.isEditorOpen.set(true);
+        });
     }
 
     private readonly data = inject(ExplorerDataService);
     private readonly registry = inject(CommandRegistry);
     private readonly contextMenu = inject(ContextMenuService);
+    private readonly connections = inject(ConnectionStateService);
 
     /** Whether the connection editor is open. */
     readonly isEditorOpen = signal(false);
+
+    /** Set when the editor is open to edit an existing connection, rather than create one. */
+    readonly editingConnectionId = signal<ObjectId | undefined>(undefined);
 
     /** Whether the Proposals panel is expanded. */
     readonly isProposalsOpen = signal(false);
@@ -89,14 +101,16 @@ export class App extends ComponentBase {
     /** How many proposals await a decision. */
     readonly pendingProposals = computed(() => this.ai.pendingProposalCount());
 
-    /** Opens the connection editor. */
+    /** Opens the connection editor to create a new connection. */
     openEditor(): void {
+        this.editingConnectionId.set(undefined);
         this.isEditorOpen.set(true);
     }
 
     /** Closes the connection editor. */
     closeEditor(): void {
         this.isEditorOpen.set(false);
+        this.editingConnectionId.set(undefined);
     }
 
     /** Toggles the Proposals panel. */

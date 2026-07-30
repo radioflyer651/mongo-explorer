@@ -111,7 +111,7 @@
 </div>
 
 @if (isEditorOpen()) {
-    <app-connection-editor (closed)="closeEditor()"></app-connection-editor>
+    <app-connection-editor [connectionId]="editingConnectionId()" (closed)="closeEditor()"></app-connection-editor>
 }
 
 <app-command-menu

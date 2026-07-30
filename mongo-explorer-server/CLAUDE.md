@@ -17,7 +17,7 @@ Zod · jsonwebtoken + bcryptjs · `@modelcontextprotocol/sdk` · `@azure/identit
 file has a *server + client* compound that starts both.
 
 ```bash
-npm start          # ts-node, port 2701, bound to 127.0.0.1
+npm start          # ts-node, port 27050, bound to 127.0.0.1
 npm run typecheck  # tsc --noEmit
 npm test           # node --test over test/
 npm run check:actor-gate
@@ -26,8 +26,10 @@ npm run check:actor-gate
 Config: `app-config.json` (gitignored) — schema in [APP-CONFIG.md](APP-CONFIG.md). Every leaf is
 env-var overridable.
 
-**Port 2701, bound to `127.0.0.1`.** Single-user, never network-reachable. Do not change
-`bindAddress` — the MCP endpoint has no auth precisely because it is loopback-only.
+**Port 27050, bound to `127.0.0.1`.** Single-user, never network-reachable. Do not change
+`bindAddress` — the MCP endpoint has no auth precisely because it is loopback-only. (Originally
+`2701`; moved because `CmRcService`, SCCM Remote Control, listens on it by default on
+corporate-managed Windows machines and binds before user processes can.)
 
 ## ⚠ Two MongoDB contexts — read before touching anything
 

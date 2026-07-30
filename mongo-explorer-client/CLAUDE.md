@@ -27,7 +27,7 @@ npx ng build --configuration development
 ```
 
 Dev server binds IPv6 `localhost:27100`; the server's CORS allows both `localhost` and `127.0.0.1`.
-The server must be running on `127.0.0.1:2701`.
+The server must be running on `127.0.0.1:27050`.
 
 ## Component rules
 

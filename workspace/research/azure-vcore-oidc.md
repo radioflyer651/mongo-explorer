@@ -105,6 +105,13 @@ relying on: `retryWrites`, `$lookup` behavior, index creation options, and which
 available. Feature detection at connect time is safer than a hard-coded compatibility matrix — but
 don't build that until we've seen the real gaps.
 
+`[Confident]` **vCore is SRV-only.** The connection string Azure's portal generates is
+`mongodb+srv://<cluster>.mongocluster.cosmos.azure.com/?...`, never a direct `mongodb://host:port`.
+`AzureOidcStrategy` originally hard-coded the ported form, which cannot work against a real cluster —
+fixed by making `port` optional and building `mongodb+srv://<host>` when it's absent. The same
+Azure-generated string also confirms `retryWrites=false` and `maxIdleTimeMS=120000` as Azure's own
+recommended settings for vCore, now applied as OIDC connection defaults.
+
 ---
 
 ## Implementation implications for this repo
@@ -124,6 +131,24 @@ don't build that until we've seen the real gaps.
    opaque errors; we should not add to that.
 
 ---
+
+## `[Confident]` Found on the work machine: use the machine callback, not the human one
+
+`AzureOidcStrategy` originally set `OIDC_HUMAN_CALLBACK` unconditionally, for every flow. That's
+wrong for anything non-interactive (Azure CLI, managed identity, client secret): the driver's human
+workflow runs a **two-step SASL conversation** — an empty first `saslStart` requesting `IdPInfo` from
+the server, then the JWT on a second step — while the machine workflow (`OIDC_CALLBACK`) sends the JWT
+immediately on the first message. Cosmos DB for MongoDB (vCore) rejected the empty first message with
+a server-side error reading as **"JWT token missing from OIDC payload,"** which looks like a token
+problem but is actually a SASL-shape mismatch — vCore appears to only implement the one-step form.
+
+Fixed by keying off `IOidcTokenProvider.isInteractive` (already present on every provider, previously
+unused): `OIDC_HUMAN_CALLBACK` for `AuthorizationCode`/`DeviceCode`, `OIDC_CALLBACK` for
+`AzureCli`/`ManagedIdentity`/`ClientCredentials`. See
+[azure-oidc.strategy.ts](../../mongo-explorer-server/src/connections/strategies/azure-oidc.strategy.ts).
+
+Still open: whether vCore's server implements the human/two-step form *at all* for the interactive
+flows, or whether those need machine-style callbacks too. Untested as of this writing.
 
 ## Verification checklist — run on the work machine
 
