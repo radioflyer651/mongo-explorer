@@ -52,7 +52,7 @@ Mongo host (it says `.run`; correct is **`.com`**).
 ## Cross-cutting decisions already made
 
 - **Ports:** client `27100`, server `2701`.
-- **Internal DB:** `mongo-explorer` on `mongo.fingercraft.com:27017`.
+- **Internal DB:** `mongo-explorer` on `mongo.example.com:27017`.
 - **Angular is zoneless.** `provideZonelessChangeDetection()`, no zone.js polyfill. Services stay
   RxJS; components consume state as signals via `toSignal()`.
 - **The server brokers all MongoDB access.** The browser never holds a driver or a target-cluster

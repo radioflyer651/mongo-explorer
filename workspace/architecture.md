@@ -81,7 +81,7 @@ mechanism. There is deliberately **no** implicit link between the app JWT and an
 Both numbers deliberately reference MongoDB's `27017`. Neither collides with existing local projects
 (d-talk uses `54647` / `1062`).
 
-**Internal database:** `mongo-explorer` on the shared instance at `mongo.fingercraft.com:27017`. This
+**Internal database:** `mongo-explorer` on the shared instance at `mongo.example.com:27017`. This
 is where saved connections, users, and preferences live — it is *not* a database the user browses.
 Keeping our own store on a boring, always-available instance means the app is usable before any target
 connection works.

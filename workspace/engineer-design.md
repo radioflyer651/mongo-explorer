@@ -130,7 +130,7 @@ short version:
   receives a connection string.
 
 **"While certainly possible" — the same-instance case.** Nothing stops a user from pointing a
-Connection at `mongo.fingercraft.com` and browsing the `mongo-explorer` database itself. That must
+Connection at `mongo.example.com` and browsing the `mongo-explorer` database itself. That must
 work; it's a legitimate thing to do and blocking it would be paternalistic. But:
 
 - `[Judgment]` The Application Database **never appears as a pre-populated Connection.** The user has

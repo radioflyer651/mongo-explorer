@@ -91,11 +91,11 @@ Both echo MongoDB's `27017`. Neither is a default (`4200`), and neither collides
   cached, and overrideable per-leaf by environment variables (see [Config loading](#config-loading)).
   Document the schema in `APP-CONFIG.md` with placeholder example values.
 - Never commit secrets. Template config uses placeholders like `<your-jwt-secret>`.
-- **Internal DB `[Internal DB]`** — the shared MongoDB instance is at **`mongo.fingercraft.com:27017`**.
+- **Internal DB `[Internal DB]`** — the shared MongoDB instance is at **`mongo.example.com:27017`**.
   Mongo Explorer's own database name is `mongo-explorer`:
   ```json
   "mongo": {
-      "connectionString": "mongodb://mongo.fingercraft.com:27017",
+      "connectionString": "mongodb://mongo.example.com:27017",
       "databaseName": "mongo-explorer"
   }
   ```
@@ -1010,7 +1010,7 @@ playbook. **Where it disagrees with this document, this document wins.** Known d
 | Angular change detection | Zone.js, default change detection | **Zoneless** — `provideZonelessChangeDetection()`, no zone.js polyfill |
 | Component state | RxJS subscriptions into fields | **Signals** — `toSignal()` bridge, `signal()`/`computed()` for view state |
 | PrimeNG async dialogs | `[(visible)]` | `[visible]` + `(visibleChange)` bound to a signal |
-| Shared Mongo host | `mongo.fingercraft.run:27017` | **`mongo.fingercraft.com:27017`** |
+| Shared Mongo host | `mongo.example.run:27017` | **`mongo.example.com:27017`** |
 
 **Consequence for setup:** when `/mean-stack-project-setup` runs, it must follow *this* document, not
 its own reference — specifically, scaffold Angular zoneless with no zone.js polyfill, and use the

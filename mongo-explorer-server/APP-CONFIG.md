@@ -26,7 +26,7 @@ connection interface, never here.
 
 ```json
 "mongo": {
-    "connectionString": "mongodb://mongo.fingercraft.com:27017",
+    "connectionString": "mongodb://mongo.example.com:27017",
     "databaseName": "mongo-explorer"
 }
 ```
@@ -89,7 +89,7 @@ Origins permitted by CORS. Exactly the local client, never a wildcard.
 ## First-run checklist
 
 1. Replace `<your-jwt-secret>` and `<your-secret-encryption-key>` with real values.
-2. Confirm the Application Database at `mongo.fingercraft.com:27017` is reachable, or point
+2. Confirm the Application Database at `mongo.example.com:27017` is reachable, or point
    `mongo.connectionString` at a local instance.
 3. Leave `bindAddress` as `127.0.0.1`.
 4. `npm start`.

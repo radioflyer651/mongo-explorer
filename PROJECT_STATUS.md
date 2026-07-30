@@ -9,7 +9,7 @@
 ## Bottom line
 
 Both projects are installed, compile clean, and run. The server was exercised end-to-end against the
-real MongoDB at `mongo.fingercraft.com:27017` — real databases listed, capability detection correct,
+real MongoDB at `mongo.example.com:27017` — real databases listed, capability detection correct,
 50 MCP tools registered, and all four AI-safety guarantees verified live over the MCP protocol.
 
 The one thing not verified: **the Angular UI has not been opened in a browser.** It builds and the dev
@@ -38,7 +38,7 @@ cd mongo-explorer-client && npm start
 | `npm run check:actor-gate` | intact, 7 files scanned |
 | `node scripts/sync-shared-models.ts --check` | 14 files in sync |
 | Server boot | listening, MCP endpoint mounted |
-| Live database read | real databases listed from `mongo.fingercraft.com` |
+| Live database read | real databases listed from `mongo.example.com` |
 | Capability detection | correctly identified self-hosted MongoDB 6.0.5 |
 
 ---
@@ -171,11 +171,11 @@ Fixed by [context-menu.service.ts](mongo-explorer-client/src/app/core/commands/c
 ## Environment notes
 
 - **Not the work machine.** No Azure vCore cluster or tenant. All Azure work is structural.
-- `mongo.fingercraft.com:27017` **is** reachable from here and holds the `mongo-explorer` Application
+- `mongo.example.com:27017` **is** reachable from here and holds the `mongo-explorer` Application
   Database (created and indexed during verification).
 - Node 26.3.1, npm 11.16.0, global Angular CLI 20 (client generated with `npx @angular/cli@22`).
 - `app-config.json` contains **dev-only placeholder secrets**. Replace before storing real credentials.
-- A test connection named `fingercraft-local-test` was created during verification and is flagged
+- A test connection named `example-local-test` was created during verification and is flagged
   `isApplicationDatabase: true`. Delete it if you don't want it.
 
 ---

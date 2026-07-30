@@ -42,7 +42,7 @@ const defaultConfig: IAppConfig = {
         bindAddress: '127.0.0.1',
     },
     mongo: {
-        connectionString: 'mongodb://mongo.fingercraft.com:27017',
+        connectionString: 'mongodb://mongo.example.com:27017',
         databaseName: 'mongo-explorer',
     },
     auth: {
