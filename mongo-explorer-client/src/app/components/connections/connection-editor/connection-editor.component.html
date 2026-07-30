@@ -1,0 +1,183 @@
+<div class="editor-backdrop" (click)="cancel()"></div>
+
+<div class="connection-editor panel">
+    <div class="panel-header">
+        <i class="pi pi-server"></i>
+        <span>New connection</span>
+    </div>
+
+    <div class="editor-body">
+        <label class="field">
+            <span class="field-label tiny">Name</span>
+            <input type="text" [ngModel]="name()" (ngModelChange)="name.set($event)" placeholder="My cluster" />
+        </label>
+
+        <label class="field">
+            <span class="field-label tiny">Authentication</span>
+            <select [ngModel]="strategyKind()" (ngModelChange)="strategyKind.set($event)">
+                @for (option of strategies; track option.kind) {
+                    <option [value]="option.kind">{{ option.label }}</option>
+                }
+            </select>
+        </label>
+
+        @switch (strategyKind()) {
+            @case ('connection-string') {
+                <label class="field">
+                    <span class="field-label tiny">Connection string</span>
+                    <input class="mono" type="text" [ngModel]="uri()" (ngModelChange)="uri.set($event)"
+                           placeholder="mongodb://host:27017" />
+                </label>
+            }
+
+            @case ('scram') {
+                <div class="field-row">
+                    <label class="field grow">
+                        <span class="field-label tiny">Host</span>
+                        <input type="text" [ngModel]="host()" (ngModelChange)="host.set($event)" />
+                    </label>
+                    <label class="field narrow">
+                        <span class="field-label tiny">Port</span>
+                        <input type="number" [ngModel]="port()" (ngModelChange)="port.set($event)" />
+                    </label>
+                </div>
+                <div class="field-row">
+                    <label class="field grow">
+                        <span class="field-label tiny">User name</span>
+                        <input type="text" [ngModel]="userName()" (ngModelChange)="userName.set($event)" />
+                    </label>
+                    <label class="field narrow">
+                        <span class="field-label tiny">Auth source</span>
+                        <input type="text" [ngModel]="authSource()" (ngModelChange)="authSource.set($event)" />
+                    </label>
+                </div>
+            }
+
+            @case ('azure-oidc') {
+                <div class="oidc-note tiny">
+                    <i class="pi pi-info-circle"></i>
+                    Nothing here has been verified against a real Azure vCore cluster. The token resource and
+                    the allowed-hosts list are the two values most likely to need correcting — the driver's
+                    default host allow-list excludes Azure hosts entirely.
+                </div>
+
+                <div class="field-row">
+                    <label class="field grow">
+                        <span class="field-label tiny">Cluster host</span>
+                        <input type="text" [ngModel]="oidcHost()" (ngModelChange)="oidcHost.set($event)"
+                               placeholder="mycluster.mongocluster.cosmos.azure.com" />
+                    </label>
+                    <label class="field narrow">
+                        <span class="field-label tiny">Port</span>
+                        <input type="number" [ngModel]="oidcPort()" (ngModelChange)="oidcPort.set($event)" />
+                    </label>
+                </div>
+
+                <label class="field">
+                    <span class="field-label tiny">Flow</span>
+                    <select [ngModel]="oidcFlow()" (ngModelChange)="oidcFlow.set($event)">
+                        @for (option of oidcFlows; track option.flow) {
+                            <option [value]="option.flow">{{ option.label }}</option>
+                        }
+                    </select>
+                </label>
+
+                <div class="field-row">
+                    <label class="field grow">
+                        <span class="field-label tiny">Tenant (directory) id</span>
+                        <input class="mono" type="text" [ngModel]="tenantId()" (ngModelChange)="tenantId.set($event)" />
+                    </label>
+                    <label class="field grow">
+                        <span class="field-label tiny">Client (application) id</span>
+                        <input class="mono" type="text" [ngModel]="clientId()" (ngModelChange)="clientId.set($event)" />
+                    </label>
+                </div>
+
+                <label class="field">
+                    <span class="field-label tiny">
+                        Token resource
+                        @if (tokenResourceMissing()) {
+                            <span class="danger-text">— required, and unverified for vCore</span>
+                        }
+                    </span>
+                    <input class="mono" type="text" [ngModel]="tokenResource()"
+                           (ngModelChange)="tokenResource.set($event)"
+                           placeholder="https://…/.default" />
+                </label>
+
+                <label class="field">
+                    <span class="field-label tiny">Allowed hosts (comma separated)</span>
+                    <input class="mono" type="text" [ngModel]="allowedHosts()"
+                           (ngModelChange)="allowedHosts.set($event)" />
+                </label>
+
+                <label class="field">
+                    <span class="field-label tiny">Principal name (optional)</span>
+                    <input class="mono" type="text" [ngModel]="principalName()"
+                           (ngModelChange)="principalName.set($event)" />
+                </label>
+            }
+
+            @case ('x509') {
+                <div class="field-row">
+                    <label class="field grow">
+                        <span class="field-label tiny">Host</span>
+                        <input type="text" [ngModel]="host()" (ngModelChange)="host.set($event)" />
+                    </label>
+                    <label class="field narrow">
+                        <span class="field-label tiny">Port</span>
+                        <input type="number" [ngModel]="port()" (ngModelChange)="port.set($event)" />
+                    </label>
+                </div>
+                <label class="field">
+                    <span class="field-label tiny">Certificate and key file path</span>
+                    <input class="mono" type="text" [ngModel]="certificatePath()"
+                           (ngModelChange)="certificatePath.set($event)" />
+                </label>
+            }
+        }
+
+        @if (needsSecret()) {
+            <label class="field">
+                <span class="field-label tiny">Password or secret</span>
+                <input type="password" [ngModel]="secret()" (ngModelChange)="secret.set($event)" />
+            </label>
+
+            <label class="checkbox-field">
+                <input type="checkbox" [ngModel]="rememberSecret()" (ngModelChange)="rememberSecret.set($event)" />
+                <span class="small">
+                    Remember this secret. It is encrypted at rest and never returned to the browser.
+                </span>
+            </label>
+        }
+
+        <label class="checkbox-field readonly-field">
+            <input type="checkbox" [ngModel]="isReadOnly()" (ngModelChange)="isReadOnly.set($event)" />
+            <span class="small">
+                <strong>Read-only.</strong> Every write through this connection is refused server-side. A guard
+                rail against your own mistakes, not against an attacker.
+            </span>
+        </label>
+
+        <label class="field">
+            <span class="field-label tiny">Notes (optional)</span>
+            <input type="text" [ngModel]="notes()" (ngModelChange)="notes.set($event)" />
+        </label>
+
+        @if (saveError()) {
+            <div class="save-error small">
+                <i class="pi pi-exclamation-triangle"></i> {{ saveError() }}
+            </div>
+        }
+    </div>
+
+    <div class="editor-actions">
+        <button type="button" class="action" (click)="cancel()">Cancel</button>
+        <button type="button" class="action primary" [class.is-disabled]="isSaving()" (click)="save()">
+            @if (isSaving()) {
+                <i class="pi pi-spin pi-spinner"></i>
+            }
+            Save connection
+        </button>
+    </div>
+</div>

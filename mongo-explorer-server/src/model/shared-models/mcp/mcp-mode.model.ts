@@ -1,0 +1,114 @@
+/**
+ * How much the MCP server is permitted to do. The user-facing switch that blocks
+ * or enables an AI from changing what is on screen.
+ *
+ * No mode permits an AI to execute a Target Database write. That is not a setting;
+ * it is the absence of a code path.
+ */
+export enum McpMode {
+    /** Everything is refused except reading the current mode. */
+    Off = 'off',
+
+    /** Reads are permitted. Interface state may not be changed. */
+    Observe = 'observe',
+
+    /** Reads and interface changes are permitted. Data changes are proposals only. */
+    Collaborate = 'collaborate',
+}
+
+/** What a given mode actually permits, for display in the switch tooltip. */
+export interface McpModeCapabilities {
+    /** The mode being described. */
+    mode: McpMode;
+
+    /** Whether application state may be read. */
+    canReadAppState: boolean;
+
+    /** Whether Target Databases may be read. */
+    canReadTargetDatabase: boolean;
+
+    /** Whether interface state may be changed. */
+    canChangeUi: boolean;
+
+    /** Whether data changes may be staged for the user to execute. */
+    canStageProposals: boolean;
+
+    /** Always false, in every mode, permanently. */
+    canExecuteDataChanges: false;
+}
+
+/** Capability matrix for every mode. The last column is false everywhere. */
+export const MCP_MODE_CAPABILITIES: Readonly<Record<McpMode, McpModeCapabilities>> = {
+    [McpMode.Off]: {
+        mode: McpMode.Off,
+        canReadAppState: false,
+        canReadTargetDatabase: false,
+        canChangeUi: false,
+        canStageProposals: false,
+        canExecuteDataChanges: false,
+    },
+    [McpMode.Observe]: {
+        mode: McpMode.Observe,
+        canReadAppState: true,
+        canReadTargetDatabase: true,
+        canChangeUi: false,
+        canStageProposals: true,
+        canExecuteDataChanges: false,
+    },
+    [McpMode.Collaborate]: {
+        mode: McpMode.Collaborate,
+        canReadAppState: true,
+        canReadTargetDatabase: true,
+        canChangeUi: true,
+        canStageProposals: true,
+        canExecuteDataChanges: false,
+    },
+};
+
+/**
+ * How a command is exposed over MCP. Declared on the command itself, so the MCP
+ * surface is a projection of the command registry rather than a parallel
+ * implementation of every operation.
+ */
+export type McpClassification =
+    /** Executes freely; reads only. */
+    | 'read'
+    /** Changes interface state; gated by the mode. */
+    | 'ui'
+    /** Stages a change for the user to execute; never executes. */
+    | 'propose'
+    /** Not exposed over MCP at all. The default for anything that writes. */
+    | 'never';
+
+/** Structured refusal codes. Every refusal is actionable, never a bare failure. */
+export type McpRefusalCode =
+    | 'mode_blocked'
+    | 'dirty_state_veto'
+    | 'read_only_connection'
+    | 'writes_prohibited'
+    | 'write_stage_present'
+    | 'unclassifiable_command'
+    | 'no_active_session'
+    | 'stale_state'
+    | 'pending_user_interaction'
+    | 'result_truncated'
+    | 'not_connected'
+    | 'invalid_argument';
+
+/** A structured refusal returned to the MCP client. */
+export interface McpRefusal {
+    /** Which refusal this is. */
+    code: McpRefusalCode;
+
+    /** Plain-language explanation, suitable for relaying to the user. */
+    message: string;
+
+    /**
+     * Guidance written in the imperative for a model to act on, for example
+     * "Use propose_document_update to stage this for the user to execute."
+     */
+    hint: string;
+
+    /** Additional structured context, varying by code. */
+    detail?: Record<string, unknown>;
+}

@@ -1,0 +1,81 @@
+{
+    // Press F5 with a server file focused to start the API with a debugger attached.
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug server",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/index.ts",
+            "cwd": "${workspaceFolder}",
+            // ts-node compiles on the fly, so there is no build step to wait for.
+            "runtimeArgs": ["-r", "ts-node/register"],
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
+            },
+            "sourceMaps": true,
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"],
+            "presentation": {
+                "group": "1-run",
+                "order": 1
+            }
+        },
+        {
+            "name": "Debug server (break on start)",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/index.ts",
+            "cwd": "${workspaceFolder}",
+            "runtimeArgs": ["-r", "ts-node/register"],
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
+            },
+            "stopOnEntry": true,
+            "sourceMaps": true,
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"],
+            "presentation": {
+                "group": "1-run",
+                "order": 2
+            }
+        },
+        {
+            // Useful for stepping through a guard refusal — every safety layer is
+            // covered by these tests.
+            "name": "Debug safety tests",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/test/safety.test.ts",
+            "cwd": "${workspaceFolder}",
+            "runtimeArgs": ["-r", "ts-node/register", "--test"],
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
+            },
+            "sourceMaps": true,
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"],
+            "presentation": {
+                "group": "2-test",
+                "order": 1
+            }
+        },
+        {
+            // Attach to a server already started from a terminal with --inspect.
+            "name": "Attach to running server",
+            "type": "node",
+            "request": "attach",
+            "port": 9229,
+            "restart": true,
+            "sourceMaps": true,
+            "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"],
+            "presentation": {
+                "group": "3-attach",
+                "order": 1
+            }
+        }
+    ]
+}

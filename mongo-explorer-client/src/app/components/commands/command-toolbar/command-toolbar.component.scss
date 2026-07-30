@@ -1,0 +1,51 @@
+.command-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-tight);
+}
+
+.toolbar-command {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-small);
+    background: transparent;
+    color: var(--color-text);
+    font-size: var(--font-size-small);
+
+    /* Pointer events stay live while disabled so the tooltip carrying the reason is
+       still reachable. */
+    cursor: pointer;
+
+    &:hover {
+        background: var(--color-surface-hover);
+        border-color: var(--color-border);
+    }
+
+    &.destructive {
+        color: var(--color-danger);
+
+        &:hover {
+            background: var(--color-danger-surface);
+            border-color: var(--color-danger-border);
+        }
+    }
+
+    /* Visible but disabled beats hidden: hiding a command teaches the user it does
+       not exist. */
+    &.is-disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+
+        &:hover {
+            background: transparent;
+            border-color: transparent;
+        }
+    }
+
+    .command-label {
+        white-space: nowrap;
+    }
+}

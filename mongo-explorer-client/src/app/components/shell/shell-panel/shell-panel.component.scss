@@ -1,0 +1,180 @@
+:host {
+    display: block;
+    height: 100%;
+    min-height: 0;
+}
+
+.header-spacer {
+    flex: 1 1 auto;
+}
+
+.shell-panel {
+    background: var(--color-surface-page);
+}
+
+.shell-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-small);
+    padding: var(--space-tight) var(--space-small);
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-panel);
+
+    .tier-badge {
+        padding: 0 0.3rem;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-small);
+        background: var(--color-surface-sunken);
+        color: var(--color-text-subtle);
+    }
+}
+
+.shell-action {
+    padding: 0 0.15rem;
+    border: none;
+    background: transparent;
+    color: var(--color-text-subtle);
+    cursor: pointer;
+
+    &:hover {
+        color: var(--color-brand-primary);
+    }
+}
+
+.transcript {
+    overflow: auto;
+    padding: var(--space-small);
+}
+
+.entry {
+    margin-bottom: var(--space-small);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+    background: var(--color-surface-raised);
+
+    &.status-refused {
+        border-color: var(--color-warning);
+    }
+
+    &.status-failed {
+        border-color: var(--color-danger-border);
+    }
+
+    .entry-header {
+        display: flex;
+        align-items: center;
+        gap: var(--space-small);
+        padding: var(--space-tight) var(--space-small);
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .entry-classification {
+        padding: 0 0.3rem;
+        border-radius: var(--radius-small);
+        background: var(--color-surface-sunken);
+        color: var(--color-text-muted);
+    }
+
+    .entry-input {
+        margin: 0;
+        padding: var(--space-small);
+        background: var(--color-surface-sunken);
+    }
+
+    .entry-result {
+        margin: 0;
+        padding: var(--space-small);
+        max-height: 18rem;
+        overflow: auto;
+        border-top: 1px solid var(--color-border);
+    }
+
+    .entry-refusal {
+        padding: var(--space-small);
+        color: var(--color-warning);
+    }
+
+    .entry-error {
+        padding: var(--space-small);
+        color: var(--color-danger);
+    }
+
+    .entry-pending {
+        padding: var(--space-small);
+        color: var(--color-text-muted);
+    }
+}
+
+.shell-input-area {
+    padding: var(--space-small);
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface-panel);
+
+    .input-row {
+        display: flex;
+        gap: var(--space-small);
+        align-items: stretch;
+    }
+
+    .database-input {
+        flex: 0 0 9rem;
+        padding: 0.25rem 0.4rem;
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-small);
+    }
+
+    .command-input {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding: 0.25rem 0.4rem;
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-small);
+        resize: vertical;
+    }
+
+    .run-button {
+        flex: 0 0 auto;
+        padding: 0 0.75rem;
+        border: 1px solid var(--color-brand-primary);
+        border-radius: var(--radius-small);
+        background: var(--color-surface-raised);
+        color: var(--color-brand-primary);
+        cursor: pointer;
+
+        &.is-disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+    }
+
+    .classification-hint {
+        margin-top: var(--space-tight);
+        color: var(--color-text-muted);
+
+        &.writes {
+            color: var(--color-danger);
+        }
+
+        &.unknown {
+            color: var(--color-warning);
+        }
+    }
+
+    .input-error {
+        margin-top: var(--space-tight);
+        color: var(--color-danger);
+    }
+}
+
+/* An AI-written command is visibly attributed while it waits for the user. */
+.ai-authored-note {
+    display: flex;
+    align-items: center;
+    gap: var(--space-tight);
+    margin-bottom: var(--space-tight);
+    padding: var(--space-tight) var(--space-small);
+    border: 1px solid var(--color-ai-border);
+    border-radius: var(--radius-small);
+    background: var(--color-ai-surface);
+    color: var(--color-ai);
+}

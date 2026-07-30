@@ -1,0 +1,27 @@
+@let active = activeOption();
+
+<div class="ai-mode-switch" [title]="active.tooltip + '\n\n' + neverWritesNote()">
+    <span class="switch-label tiny">AI</span>
+
+    <div class="switch-track" role="radiogroup" aria-label="AI permission mode">
+        @for (option of options; track option.mode) {
+            <button
+                type="button"
+                class="switch-option"
+                role="radio"
+                [class.active]="option.mode === current()"
+                [attr.aria-checked]="option.mode === current()"
+                [style.--option-color]="option.color"
+                [title]="option.label + ' — ' + option.tooltip"
+                (click)="select(option.mode)">
+                <i [class]="option.icon"></i>
+                <span class="option-label tiny">{{ option.label }}</span>
+            </button>
+        }
+    </div>
+
+    @if (!isLive()) {
+        <i class="pi pi-exclamation-triangle disconnected-warning"
+           title="Not connected to the Mongo Explorer server; this switch may be showing stale state."></i>
+    }
+</div>

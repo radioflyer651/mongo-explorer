@@ -1,0 +1,145 @@
+<div class="explorer-sidebar open-height">
+    <div class="sidebar-section no-shrink">
+        <div class="section-title tiny">Connections</div>
+
+        @if (connectionList().length === 0) {
+            <div class="state-block compact">
+                <i class="pi pi-server state-icon"></i>
+                <div class="small">No connections yet.</div>
+                <div class="tiny subtle">Add one from the toolbar to get started.</div>
+            </div>
+        }
+
+        @for (connection of connectionList(); track connection._id) {
+            <div
+                class="tree-row connection-row"
+                [class.active]="connection._id === activeConnectionId()"
+                (click)="selectConnection(connection)"
+                (contextmenu)="openConnectionMenu(connection, $event)">
+                <i class="row-icon" [class]="iconFor(connection)" [style.color]="colorFor(connection)"
+                   [title]="stateTextFor(connection)"></i>
+
+                <span class="row-label truncate" [title]="connection.endpointSummary">{{ connection.name }}</span>
+
+                @if (connection.isReadOnly) {
+                    <span class="readonly-badge" title="Writes are refused through this connection.">
+                        <i class="pi pi-ban"></i>
+                    </span>
+                }
+
+                @if (connection.isApplicationDatabase) {
+                    <i class="pi pi-info-circle app-db-hint"
+                       title="This connection points at Mongo Explorer's own application data. Changes here affect the app itself."></i>
+                }
+
+                @if (isConnected(connection)) {
+                    <button type="button" class="row-action" title="Disconnect" (click)="disconnect(connection, $event)">
+                        <i class="pi pi-sign-out"></i>
+                    </button>
+                }
+
+                <button
+                    type="button"
+                    class="row-action"
+                    title="More actions"
+                    (click)="openConnectionMenu(connection, $event)">
+                    <i class="pi pi-ellipsis-v"></i>
+                </button>
+            </div>
+
+            @if (needsInteraction(connection)) {
+                @let prompt = interactionFor(connection);
+                <div class="interaction-prompt">
+                    <i class="pi pi-external-link"></i>
+                    <div class="prompt-body">
+                        <div class="small">{{ prompt?.message }}</div>
+                        @if (prompt?.userCode) {
+                            <div class="mono code">{{ prompt?.userCode }}</div>
+                        }
+                        @if (prompt?.url) {
+                            <a class="tiny" [href]="prompt?.url" target="_blank" rel="noopener">Open sign-in page</a>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    @if (activeConnectionId()) {
+        <div class="sidebar-section grow-scroll">
+            <div class="section-title tiny">
+                <span>Databases</span>
+                <input
+                    type="text"
+                    class="filter-input"
+                    placeholder="Filter…"
+                    [ngModel]="filterText()"
+                    (ngModelChange)="filterText.set($event)" />
+            </div>
+
+            @if (isLoadingDatabases()) {
+                <div class="state-block compact">
+                    <i class="pi pi-spin pi-spinner state-icon"></i>
+                    <div class="small">Loading databases…</div>
+                </div>
+            } @else if (loadError()) {
+                <div class="state-block compact">
+                    <i class="pi pi-exclamation-triangle state-icon"></i>
+                    <div class="small danger-text">{{ loadError() }}</div>
+                </div>
+            } @else {
+                @for (node of visibleDatabases(); track node.database.name) {
+                    <div
+                        class="tree-row database-row"
+                        (click)="toggleDatabase(node)"
+                        (contextmenu)="openDatabaseMenu(node.database.name, $event)">
+                        <i [class]="node.isExpanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></i>
+                        <i class="row-icon pi pi-database"></i>
+                        <span class="row-label truncate">{{ node.database.name }}</span>
+                        <span class="row-meta tiny subtle">{{ formatBytes(node.database.sizeOnDisk) }}</span>
+
+                        <button
+                            type="button"
+                            class="row-action"
+                            title="More actions"
+                            (click)="openDatabaseMenu(node.database.name, $event)">
+                            <i class="pi pi-ellipsis-v"></i>
+                        </button>
+                    </div>
+
+                    @if (node.isExpanded) {
+                        @if (node.isLoading) {
+                            <div class="tree-row indented subtle small">
+                                <i class="pi pi-spin pi-spinner"></i> Loading collections…
+                            </div>
+                        } @else if (node.error) {
+                            <div class="tree-row indented small danger-text">{{ node.error }}</div>
+                        } @else if ((node.collections ?? []).length === 0) {
+                            <div class="tree-row indented subtle small">No collections.</div>
+                        } @else {
+                            @for (collection of node.collections; track collection.name) {
+                                <div
+                                    class="tree-row collection-row indented"
+                                    (click)="openCollection(node.database.name, collection); $event.stopPropagation()"
+                                    (contextmenu)="openCollectionMenu(node.database.name, collection, $event)">
+                                    <i class="row-icon" [class]="collection.isView ? 'pi pi-eye' : 'pi pi-table'"></i>
+                                    <span class="row-label truncate">{{ collection.name }}</span>
+                                    @if (collection.documentCount !== undefined) {
+                                        <span class="row-meta tiny subtle">{{ collection.documentCount }}</span>
+                                    }
+                                    <button
+                                        type="button"
+                                        class="row-action"
+                                        title="More actions"
+                                        (click)="openCollectionMenu(node.database.name, collection, $event)">
+                                        <i class="pi pi-ellipsis-v"></i>
+                                    </button>
+                                </div>
+                            }
+                        }
+                    }
+                }
+            }
+        </div>
+    }
+</div>

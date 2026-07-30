@@ -1,0 +1,25 @@
+@let ctx = context();
+
+<div class="complex-cell">
+    <span class="summary-row">
+        @if (canExpand()) {
+            <button
+                type="button"
+                class="expand-button"
+                [title]="isExpanded() ? 'Collapse' : 'Expand'"
+                (click)="toggle($event)">
+                <i [class]="isExpanded() ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></i>
+            </button>
+        }
+
+        <span class="summary-text tiny" [class.binary]="ctx.bsonType === 'binData'">{{ summary() }}</span>
+
+        @if (preview()) {
+            <span class="preview mono tiny truncate">{{ preview() }}</span>
+        }
+    </span>
+
+    @if (isExpanded()) {
+        <pre class="expanded scroll-x">{{ expandedJson() }}</pre>
+    }
+</div>

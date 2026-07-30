@@ -1,0 +1,201 @@
+@let currentTab = tab();
+@let errors = stageErrors();
+
+@if (!currentTab?.connectionId) {
+    <div class="state-block">
+        <i class="pi pi-sitemap state-icon"></i>
+        <div>Open a collection to build a pipeline against it.</div>
+    </div>
+} @else {
+    <div class="pipeline-builder open-height">
+        <div class="builder-toolbar no-shrink">
+            <button type="button" class="builder-button" (click)="isPaletteOpen.set(!isPaletteOpen())">
+                <i class="pi pi-plus"></i> Add stage
+            </button>
+
+            <button
+                type="button"
+                class="builder-button"
+                [class.is-disabled]="hasWriteStage()"
+                [title]="hasWriteStage() ? 'A write pipeline cannot be previewed.' : 'Preview the whole pipeline'"
+                (click)="preview()">
+                <i class="pi pi-search-plus"></i> Preview all
+            </button>
+
+            <span class="builder-label tiny">Sample</span>
+            <select class="builder-select" [ngModel]="sampleSize()" (ngModelChange)="sampleSize.set($event)">
+                <option [value]="10">10</option>
+                <option [value]="100">100</option>
+                <option [value]="500">500</option>
+            </select>
+
+            <span class="toolbar-spacer"></span>
+
+            <button type="button" class="builder-button" (click)="exportAs('mongosh')">
+                <i class="pi pi-download"></i> mongosh
+            </button>
+            <button type="button" class="builder-button" (click)="exportAs('node')">
+                <i class="pi pi-download"></i> Node
+            </button>
+
+            @if (hasWriteStage()) {
+                <button
+                    type="button"
+                    class="builder-button destructive"
+                    [class.is-disabled]="isReadOnly()"
+                    [title]="isReadOnly() ? 'This connection is marked read-only.' : 'Run this write pipeline'"
+                    (click)="runWritePipeline()">
+                    <i class="pi pi-play"></i> Run write pipeline
+                </button>
+            }
+        </div>
+
+        @if (hasWriteStage()) {
+            <div class="write-warning no-shrink">
+                <i class="pi pi-exclamation-triangle"></i>
+                <span>
+                    This pipeline uses <strong>{{ writeStages().join(' and ') }}</strong> and
+                    <strong>writes to a collection</strong>. It cannot be previewed or explained, and an AI can only
+                    propose it — never run it.
+                </span>
+            </div>
+        }
+
+        @if (isPaletteOpen()) {
+            <div class="palette no-shrink">
+                @for (entry of palette; track entry.operator) {
+                    <button
+                        type="button"
+                        class="palette-entry"
+                        [class.writes]="entry.operator === '$out' || entry.operator === '$merge'"
+                        (click)="addStage(entry)">
+                        <span class="palette-operator mono">{{ entry.operator }}</span>
+                        <span class="palette-description tiny">{{ entry.description }}</span>
+                    </button>
+                }
+            </div>
+        }
+
+        <div class="builder-body grow-scroll">
+            <div class="stage-column">
+                @if (stages().length === 0) {
+                    <div class="state-block">
+                        <i class="pi pi-sitemap state-icon"></i>
+                        <div>No stages yet.</div>
+                        <div class="tiny subtle">Add one from the palette to begin.</div>
+                    </div>
+                }
+
+                @for (stage of stages(); track stage.id; let index = $index) {
+                    <div class="stage" [class.disabled]="!stage.isEnabled" [class.writes]="stage.operator === '$out' || stage.operator === '$merge'">
+                        <div class="stage-header">
+                            <span class="stage-index tiny">{{ index }}</span>
+                            <span class="stage-operator mono">{{ stage.operator }}</span>
+
+                            <span class="toolbar-spacer"></span>
+
+                            <button
+                                type="button"
+                                class="stage-action"
+                                [title]="stage.isEnabled ? 'Disable this stage (keeps it)' : 'Enable this stage'"
+                                (click)="toggleStage(index)">
+                                <i [class]="stage.isEnabled ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
+                            </button>
+                            <button type="button" class="stage-action" title="Move up" (click)="moveStage(index, -1)">
+                                <i class="pi pi-chevron-up"></i>
+                            </button>
+                            <button type="button" class="stage-action" title="Move down" (click)="moveStage(index, 1)">
+                                <i class="pi pi-chevron-down"></i>
+                            </button>
+                            <button
+                                type="button"
+                                class="stage-action"
+                                [class.is-disabled]="hasWriteStage()"
+                                title="Preview the output up to this stage"
+                                (click)="preview(index)">
+                                <i class="pi pi-search-plus"></i>
+                            </button>
+                            <button type="button" class="stage-action destructive" title="Remove stage" (click)="removeStage(index)">
+                                <i class="pi pi-trash"></i>
+                            </button>
+                        </div>
+
+                        <textarea
+                            class="stage-body mono"
+                            rows="4"
+                            spellcheck="false"
+                            [class.invalid]="errors[stage.id]"
+                            [ngModel]="stage.body"
+                            (ngModelChange)="setStageBody(index, $event)"></textarea>
+
+                        @if (errors[stage.id]) {
+                            <div class="stage-error tiny">
+                                <i class="pi pi-exclamation-triangle"></i> {{ errors[stage.id] }}
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="preview-column">
+                <div class="preview-header">
+                    <i class="pi pi-search-plus"></i>
+                    <span class="small">
+                        @if (previewStageIndex() === undefined) {
+                            Preview
+                        } @else {
+                            Preview to stage {{ previewStageIndex() }}
+                        }
+                    </span>
+                    <span class="toolbar-spacer"></span>
+                    <span class="tiny subtle">{{ previewDocuments().length }} sampled</span>
+                </div>
+
+                <div class="preview-note tiny">
+                    This is a preview over a sample of {{ sampleSize() }} documents. It is not a result count.
+                </div>
+
+                @if (isPreviewing()) {
+                    <div class="state-block">
+                        <i class="pi pi-spin pi-spinner state-icon"></i>
+                        <div class="small">Running the preview…</div>
+                    </div>
+                } @else if (previewError()) {
+                    <div class="state-block">
+                        <i class="pi pi-exclamation-triangle state-icon"></i>
+                        <div class="small danger-text">{{ previewError() }}</div>
+                    </div>
+                } @else if (previewDocuments().length === 0) {
+                    <div class="state-block">
+                        <i class="pi pi-inbox state-icon"></i>
+                        <div class="small">No preview yet.</div>
+                    </div>
+                } @else {
+                    @if (previewTruncated()) {
+                        <div class="partial-banner">
+                            <i class="pi pi-exclamation-triangle"></i>
+                            <span>Output truncated at the sample limit.</span>
+                        </div>
+                    }
+
+                    @for (document of previewDocuments(); track $index) {
+                        <pre class="preview-document scroll-x">{{ displayDocument(document) }}</pre>
+                    }
+                }
+            </div>
+        </div>
+
+        @if (exportedCode()) {
+            <div class="export-panel no-shrink">
+                <div class="export-header">
+                    <span class="small">Generated code</span>
+                    <span class="toolbar-spacer"></span>
+                    <button type="button" class="stage-action" title="Close" (click)="clearExport()">
+                        <i class="pi pi-times"></i>
+                    </button>
+                </div>
+                <pre class="export-body scroll-x">{{ exportedCode() }}</pre>
+            </div>
+        }
+    </div>
+}

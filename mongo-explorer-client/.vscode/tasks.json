@@ -1,0 +1,66 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            // Background task behind the F5 launch. The problem matcher tells VS Code
+            // when the dev server is actually serving, so the browser opens against a
+            // live port rather than a refused connection.
+            "label": "ng serve",
+            "type": "npm",
+            "script": "start",
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "typescript",
+                "source": "ts",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": {
+                    "regexp": "^\\s*(ERROR|WARNING)\\s+(.*)$",
+                    "severity": 1,
+                    "message": 2
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*(Building|Changes detected).*",
+                    "endsPattern": ".*(Watch mode enabled|Local:\\s+http).*"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "ng build (development)",
+            "type": "shell",
+            "command": "npx",
+            "args": ["ng", "build", "--configuration", "development"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": ["$tsc"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "sync shared models from server",
+            "type": "shell",
+            "command": "node",
+            "args": ["../scripts/sync-shared-models.ts"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        }
+    ]
+}

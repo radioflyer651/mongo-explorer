@@ -1,0 +1,5 @@
+@if (isAbsent()) {
+    <span class="absent-cell" [title]="explanation()"></span>
+} @else {
+    <span class="null-cell" [title]="explanation()">null</span>
+}

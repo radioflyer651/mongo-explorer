@@ -1,0 +1,183 @@
+@let currentTab = tab();
+@let context = viewContext();
+
+@if (!hasCollection() || !context) {
+    <div class="state-block">
+        <i class="pi pi-table state-icon"></i>
+        <div>No collection is open.</div>
+        <div class="tiny subtle">Pick one from the tree on the left.</div>
+    </div>
+} @else {
+    <div class="collection-detail open-height">
+        <div class="query-bar no-shrink">
+            <div class="query-row">
+                <span class="query-label tiny">Filter</span>
+                <input
+                    type="text"
+                    class="query-input mono"
+                    [class.invalid]="filterError()"
+                    placeholder='{ "field": "value" }  — Extended JSON'
+                    [ngModel]="currentTab!.viewState.filter"
+                    (ngModelChange)="setFilter($event)"
+                    (keydown.control.enter)="run()" />
+
+                <button type="button" class="query-button run" title="Run query (Ctrl+Enter)" (click)="run()">
+                    <i class="pi pi-play"></i>
+                </button>
+
+                @if (currentTab!.viewState.filter) {
+                    <button type="button" class="query-button" title="Clear filter" (click)="clearFilter()">
+                        <i class="pi pi-times"></i>
+                    </button>
+                }
+            </div>
+
+            <div class="query-row secondary">
+                <span class="query-label tiny">Sort</span>
+                <input
+                    type="text"
+                    class="query-input mono narrow"
+                    placeholder='{ "field": -1 }'
+                    [ngModel]="currentTab!.viewState.sort"
+                    (ngModelChange)="setSort($event)" />
+
+                <span class="query-label tiny">Project</span>
+                <input
+                    type="text"
+                    class="query-input mono narrow"
+                    placeholder='{ "field": 1 }'
+                    [ngModel]="currentTab!.viewState.projection"
+                    (ngModelChange)="setProjection($event)" />
+
+                <span class="query-label tiny">Page</span>
+                <select
+                    class="query-select"
+                    [ngModel]="currentTab!.viewState.limit"
+                    (ngModelChange)="setLimit($event)">
+                    <option [value]="10">10</option>
+                    <option [value]="25">25</option>
+                    <option [value]="50">50</option>
+                    <option [value]="100">100</option>
+                    <option [value]="500">500</option>
+                </select>
+
+                <span class="bar-spacer"></span>
+
+                <div class="view-switcher">
+                    @for (view of availableViews(); track view.id) {
+                        <button
+                            type="button"
+                            class="view-option"
+                            [class.active]="view.id === activeView()?.id"
+                            [title]="view.label + (view.capabilities.canEdit ? '' : ' (read-only view)')"
+                            (click)="setView(view.id)">
+                            <i [class]="view.icon"></i>
+                            <span class="tiny">{{ view.label }}</span>
+                        </button>
+                    }
+                </div>
+            </div>
+
+            @if (filterError()) {
+                <div class="filter-error tiny">
+                    <i class="pi pi-exclamation-triangle"></i> {{ filterError() }}
+                </div>
+            }
+        </div>
+
+        @if (isPartial()) {
+            <div class="partial-banner no-shrink">
+                <i class="pi pi-exclamation-triangle"></i>
+                <span>{{ partialMessage() }}</span>
+            </div>
+        }
+
+        <div class="results grow-scroll">
+            @switch (data.state()) {
+                @case ('loading') {
+                    <div class="state-block">
+                        <i class="pi pi-spin pi-spinner state-icon"></i>
+                        <div>Running the query…</div>
+                    </div>
+                }
+                @case ('error') {
+                    <div class="state-block">
+                        <i class="pi pi-exclamation-triangle state-icon"></i>
+                        <div class="danger-text">{{ data.error() }}</div>
+                        <button type="button" class="query-button" (click)="run()">
+                            <i class="pi pi-refresh"></i> Retry
+                        </button>
+                    </div>
+                }
+                @case ('loaded') {
+                    @if (viewInputs().documents.length === 0) {
+                        <div class="state-block">
+                            <i class="pi pi-inbox state-icon"></i>
+                            @if (currentTab!.viewState.filter) {
+                                <div>No documents matched your filter.</div>
+                                <button type="button" class="query-button" (click)="clearFilter()">
+                                    <i class="pi pi-times"></i> Clear filter
+                                </button>
+                            } @else {
+                                <div>This collection is empty.</div>
+                            }
+                        </div>
+                    } @else {
+                        <app-view-host
+                            [viewContext]="context"
+                            [viewId]="currentTab!.viewState.viewId"
+                            [viewInputs]="viewInputs()"
+                            (selectionChange)="onSelectionChange($event)"
+                            (fieldActivated)="onFieldActivated($event)">
+                        </app-view-host>
+                    }
+                }
+                @default {
+                    <div class="state-block">
+                        <i class="pi pi-play state-icon"></i>
+                        <div>Run the query to load documents.</div>
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="status-bar no-shrink">
+            <span class="tiny">{{ pageText() }}</span>
+
+            @if (data.isCountEstimate()) {
+                <span class="tiny subtle" title="The exact count timed out, so this total is an estimate.">
+                    (estimated)
+                </span>
+            }
+
+            <span class="bar-spacer"></span>
+
+            @if (currentTab!.selectedIds.length > 0) {
+                <span class="tiny selection-count">{{ currentTab!.selectedIds.length }} selected</span>
+            }
+
+            @if (data.page()) {
+                <span class="tiny subtle">{{ data.page()!.durationMs }} ms</span>
+            }
+
+            <button
+                type="button"
+                class="query-button"
+                [class.is-disabled]="!canGoBack()"
+                [disabled]="!canGoBack()"
+                [title]="canGoBack() ? 'Previous page' : 'This is the first page.'"
+                (click)="previousPage()">
+                <i class="pi pi-chevron-left"></i>
+            </button>
+            <button
+                type="button"
+                class="query-button"
+                [class.is-disabled]="!canGoForward()"
+                [disabled]="!canGoForward()"
+                [title]="canGoForward() ? 'Next page' : 'There are no more documents to load.'"
+                (click)="nextPage()">
+                <i class="pi pi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+}

@@ -1,0 +1,57 @@
+/* Layout utilities. Use Bootstrap for d-flex and spacing; these cover the
+   fill-available-height cases Bootstrap does not. */
+
+%fit-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.fit-container {
+    @extend %fit-container;
+}
+
+.fit-container-scroll {
+    @extend %fit-container;
+
+    overflow: auto;
+}
+
+/* A column that fills its parent and lets one child scroll. */
+.open-height {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+}
+
+.open-height > .grow-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+}
+
+.open-width {
+    display: flex;
+    flex-direction: row;
+    min-width: 0;
+    width: 100%;
+}
+
+.open-width > .grow-scroll-x {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: auto;
+}
+
+/* Wide content scrolls inside its own container; the page never scrolls sideways. */
+.scroll-x {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.no-shrink {
+    flex: 0 0 auto;
+}

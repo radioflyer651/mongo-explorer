@@ -1,0 +1,50 @@
+/**
+ * BSON type names as reported by inference and used to drive cell rendering.
+ * Note that 'null' and 'absent' are deliberately distinct: in MongoDB a null
+ * value is not the same thing as a missing field, and the interface must never
+ * imply otherwise.
+ */
+export type BsonTypeName =
+    | 'double'
+    | 'string'
+    | 'object'
+    | 'array'
+    | 'binData'
+    | 'objectId'
+    | 'bool'
+    | 'date'
+    | 'null'
+    | 'absent'
+    | 'regex'
+    | 'javascript'
+    | 'int'
+    | 'timestamp'
+    | 'long'
+    | 'decimal'
+    | 'minKey'
+    | 'maxKey'
+    | 'unknown';
+
+/** A field observed while sampling a collection. */
+export interface FieldDescriptor {
+    /** Dotted path to the field, e.g. 'address.city'. */
+    path: string;
+
+    /** Types observed at this path, most frequent first. */
+    types: FieldTypeOccurrence[];
+
+    /** Number of sampled documents in which the field was present. */
+    presentCount: number;
+
+    /** Number of documents sampled. */
+    sampleSize: number;
+}
+
+/** One observed type for a field, with its frequency. */
+export interface FieldTypeOccurrence {
+    /** The BSON type observed. */
+    type: BsonTypeName;
+
+    /** How many sampled documents carried this type at this path. */
+    count: number;
+}

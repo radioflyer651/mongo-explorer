@@ -1,0 +1,84 @@
+{
+    "folders": [
+        {
+            "name": "client",
+            "path": "mongo-explorer-client"
+        },
+        {
+            "name": "server",
+            "path": "mongo-explorer-server"
+        },
+        {
+            "name": "workspace",
+            "path": "workspace"
+        },
+        {
+            "name": "scripts",
+            "path": "scripts"
+        }
+    ],
+    "settings": {
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true,
+        "files.eol": "\n",
+        "typescript.preferences.importModuleSpecifier": "relative",
+        "search.exclude": {
+            "**/node_modules": true,
+            "**/dist": true,
+            "**/.angular": true
+        }
+    },
+    "extensions": {
+        "recommendations": [
+            "angular.ng-template",
+            "dbaeumer.vscode-eslint",
+            "mongodb.mongodb-vscode",
+            "ms-vscode.js-debug"
+        ]
+    },
+    "launch": {
+        // Open the workspace file and press F5 to start both halves at once. F5 inside
+        // an individual project folder starts just that project.
+        "version": "0.2.0",
+        "configurations": [],
+        "compounds": [
+            {
+                "name": "Mongo Explorer: server + client",
+                "configurations": [
+                    {
+                        "name": "Debug server",
+                        "folder": "server"
+                    },
+                    {
+                        "name": "Debug client (Edge)",
+                        "folder": "client"
+                    }
+                ],
+                // Stopping either half stops both, so the ports are never left held.
+                "stopAll": true,
+                "presentation": {
+                    "group": "0-all",
+                    "order": 1
+                }
+            },
+            {
+                "name": "Mongo Explorer: server + client (Chrome)",
+                "configurations": [
+                    {
+                        "name": "Debug server",
+                        "folder": "server"
+                    },
+                    {
+                        "name": "Debug client (Chrome)",
+                        "folder": "client"
+                    }
+                ],
+                "stopAll": true,
+                "presentation": {
+                    "group": "0-all",
+                    "order": 2
+                }
+            }
+        ]
+    }
+}

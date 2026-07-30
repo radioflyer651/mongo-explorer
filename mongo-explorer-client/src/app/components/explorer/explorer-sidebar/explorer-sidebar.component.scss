@@ -1,0 +1,130 @@
+:host {
+    display: block;
+    height: 100%;
+    min-height: 0;
+}
+
+.explorer-sidebar {
+    background: var(--color-surface-panel);
+    border-right: 1px solid var(--color-border);
+}
+
+.sidebar-section {
+    min-height: 0;
+
+    &.grow-scroll {
+        overflow: auto;
+    }
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-small);
+    padding: var(--space-small) var(--space-small) var(--space-tight);
+    color: var(--color-text-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    .filter-input {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding: 0.1rem 0.3rem;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-small);
+        font-size: var(--font-size-tiny);
+        text-transform: none;
+        letter-spacing: normal;
+    }
+}
+
+.tree-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-tight);
+    padding: 0.2rem var(--space-small);
+    font-size: var(--font-size-small);
+    cursor: pointer;
+
+    &:hover {
+        background: var(--color-surface-hover);
+    }
+
+    &.active {
+        background: var(--color-surface-selected);
+        font-weight: 600;
+    }
+
+    &.indented {
+        padding-left: 1.9rem;
+    }
+
+    .row-icon {
+        width: 1rem;
+        text-align: center;
+    }
+
+    .row-label {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .row-meta {
+        flex: 0 0 auto;
+    }
+
+    .row-action {
+        flex: 0 0 auto;
+        padding: 0 0.15rem;
+        border: none;
+        background: transparent;
+        color: var(--color-text-subtle);
+        opacity: 0;
+        cursor: pointer;
+
+        &:hover {
+            color: var(--color-brand-primary);
+        }
+    }
+
+    /* The overflow button appears on hover, so right-click is never the only route. */
+    &:hover .row-action {
+        opacity: 1;
+    }
+
+    .app-db-hint {
+        color: var(--color-info);
+    }
+}
+
+.interaction-prompt {
+    display: flex;
+    gap: var(--space-small);
+    margin: var(--space-tight) var(--space-small);
+    padding: var(--space-small);
+    border: 1px solid var(--color-info);
+    border-radius: var(--radius-small);
+    background: var(--color-surface-raised);
+    color: var(--color-info);
+
+    .prompt-body {
+        min-width: 0;
+    }
+
+    .code {
+        margin-top: var(--space-tight);
+        padding: 0.1rem 0.3rem;
+        border: 1px dashed var(--color-info);
+        border-radius: var(--radius-small);
+        font-size: var(--font-size-base);
+        letter-spacing: 0.08em;
+    }
+}
+
+.state-block.compact {
+    padding: var(--space-medium) var(--space-small);
+
+    .state-icon {
+        font-size: 1.4rem;
+    }
+}

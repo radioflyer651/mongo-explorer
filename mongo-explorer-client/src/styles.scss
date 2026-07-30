@@ -1,0 +1,220 @@
+@use 'layout';
+@use 'buttons';
+
+/* Design tokens. Component SCSS references these; hard-coded colour values are an
+   anti-pattern. */
+:root {
+    /* Surfaces */
+    --color-surface-page: #ffffff;
+    --color-surface-panel: #f7f7f7;
+    --color-surface-raised: #ffffff;
+    --color-surface-sunken: #f0f0f2;
+    --color-surface-hover: #eef1f5;
+    --color-surface-selected: #e3ecf7;
+
+    /* Borders */
+    --color-border: #e0e0e0;
+    --color-border-strong: #c4c4c4;
+
+    /* Text */
+    --color-text: #1f2328;
+    --color-text-muted: #656d76;
+    --color-text-subtle: #8c949e;
+    --color-text-inverse: #ffffff;
+
+    /* Brand */
+    --color-brand-primary: var(--p-primary-color, #3b82f6);
+    --color-brand-primary-muted: #dbeafe;
+
+    /* Intent */
+    --color-danger: #d1242f;
+    --color-danger-surface: #fff5f5;
+    --color-danger-border: #f5b5b8;
+    --color-warning: #9a6700;
+    --color-warning-surface: #fff8e1;
+    --color-success: #1a7f37;
+    --color-success-surface: #eef9f1;
+    --color-info: #0969da;
+
+    /* Read-only connection guard rail */
+    --color-readonly: #6f42c1;
+    --color-readonly-surface: #f5f0ff;
+
+    /* AI attribution and mode */
+    --color-ai: #8250df;
+    --color-ai-surface: #faf5ff;
+    --color-ai-border: #d8b9ff;
+
+    /* BSON type colours for the document viewer */
+    --color-bson-objectid: #6f42c1;
+    --color-bson-string: #0a3069;
+    --color-bson-number: #0550ae;
+    --color-bson-boolean: #8250df;
+    --color-bson-date: #1a7f37;
+    --color-bson-null: #8c949e;
+    --color-bson-absent: #c4c4c4;
+    --color-bson-binary: #953800;
+    --color-bson-object: #656d76;
+    --color-bson-array: #656d76;
+
+    /* Typography */
+    --font-family-base: 'Segoe UI', system-ui, Arial, sans-serif;
+    --font-family-mono: 'Cascadia Mono', 'Consolas', 'SF Mono', monospace;
+    --font-size-base: 14px;
+    --font-size-small: 12px;
+    --font-size-tiny: 11px;
+
+    /* Spacing and shape */
+    --radius-small: 3px;
+    --radius-medium: 6px;
+    --space-tight: 0.25rem;
+    --space-small: 0.5rem;
+    --space-medium: 1rem;
+
+    /* Chrome sizing */
+    --height-toolbar: 40px;
+    --height-tabstrip: 34px;
+    --width-sidebar: 300px;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-base);
+    color: var(--color-text);
+    background: var(--color-surface-page);
+    overflow: hidden;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+code,
+pre,
+.mono {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-small);
+}
+
+/* Application-wide utilities */
+.muted {
+    color: var(--color-text-muted);
+}
+
+.subtle {
+    color: var(--color-text-subtle);
+}
+
+.tiny {
+    font-size: var(--font-size-tiny);
+}
+
+.small {
+    font-size: var(--font-size-small);
+}
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.danger-text {
+    color: var(--color-danger);
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+/* Panel scaffolding shared by every docked surface */
+.panel {
+    background: var(--color-surface-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-small);
+    padding: var(--space-small) var(--space-medium);
+    border-bottom: 1px solid var(--color-border);
+    font-weight: 600;
+}
+
+/* Empty, loading, and error states are components, not afterthoughts. */
+.state-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-small);
+    padding: 2rem var(--space-medium);
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+.state-block .state-icon {
+    font-size: 2rem;
+    opacity: 0.4;
+}
+
+/* Partial results must never read as completeness. */
+.partial-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-small);
+    padding: var(--space-tight) var(--space-small);
+    background: var(--color-warning-surface);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-warning);
+    font-size: var(--font-size-small);
+}
+
+/* AI-originated changes are always visually attributed. */
+.ai-attributed {
+    box-shadow: inset 2px 0 0 var(--color-ai);
+}
+
+.ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0 0.3rem;
+    border: 1px solid var(--color-ai-border);
+    border-radius: var(--radius-small);
+    background: var(--color-ai-surface);
+    color: var(--color-ai);
+    font-size: var(--font-size-tiny);
+}
+
+.readonly-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0 0.3rem;
+    border: 1px solid var(--color-readonly);
+    border-radius: var(--radius-small);
+    background: var(--color-readonly-surface);
+    color: var(--color-readonly);
+    font-size: var(--font-size-tiny);
+}
+
+/* PrimeNG density trim, so tables read as data rather than as cards. */
+.p-datatable .p-datatable-tbody > tr > td,
+.p-datatable .p-datatable-thead > tr > th {
+    padding: 0.3rem 0.5rem;
+}
+
+.p-tree {
+    border: none;
+    padding: 0;
+}

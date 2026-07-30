@@ -1,0 +1,50 @@
+.ai-mode-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-tight);
+
+    .switch-label {
+        color: var(--color-text-muted);
+        font-weight: 600;
+        letter-spacing: 0.04em;
+    }
+
+    .switch-track {
+        display: inline-flex;
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-medium);
+        overflow: hidden;
+    }
+
+    .switch-option {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.2rem 0.45rem;
+        border: none;
+        border-right: 1px solid var(--color-border);
+        background: var(--color-surface-panel);
+        color: var(--color-text-muted);
+        cursor: pointer;
+
+        &:last-child {
+            border-right: none;
+        }
+
+        &:hover {
+            background: var(--color-surface-hover);
+        }
+
+        /* The active position carries a colour AND a filled background, so state
+           survives a colourblind user and a bad monitor. */
+        &.active {
+            background: var(--option-color);
+            color: var(--color-text-inverse);
+            font-weight: 600;
+        }
+    }
+
+    .disconnected-warning {
+        color: var(--color-warning);
+    }
+}

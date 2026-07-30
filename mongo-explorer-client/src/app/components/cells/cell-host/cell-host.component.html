@@ -1,0 +1,7 @@
+@let chosen = renderer();
+
+@if (chosen) {
+    <ng-container *ngComponentOutlet="chosen; inputs: rendererInputs()"></ng-container>
+} @else {
+    <span class="mono subtle">(no renderer)</span>
+}

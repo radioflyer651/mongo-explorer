@@ -1,0 +1,27 @@
+@if (isOpen()) {
+    <div class="menu-backdrop" (click)="dismiss()" (contextmenu)="dismiss(); $event.preventDefault()"></div>
+
+    <div class="command-menu" [style]="menuStyle()">
+        @for (entry of groups(); track entry.group; let isLast = $last) {
+            @for (resolved of entry.commands; track resolved.command.id) {
+                <button
+                    type="button"
+                    class="menu-item"
+                    [class.destructive]="resolved.command.isDestructive"
+                    [class.is-disabled]="!resolved.enablement.enabled"
+                    [title]="tooltipFor(resolved)"
+                    (click)="invoke(resolved)">
+                    <i class="menu-icon" [class]="resolved.command.icon"></i>
+                    <span class="menu-label">{{ resolved.command.label }}</span>
+                    @if (resolved.command.keybinding) {
+                        <span class="menu-keys tiny subtle">{{ resolved.command.keybinding }}</span>
+                    }
+                </button>
+            }
+
+            @if (!isLast) {
+                <div class="menu-separator"></div>
+            }
+        }
+    </div>
+}

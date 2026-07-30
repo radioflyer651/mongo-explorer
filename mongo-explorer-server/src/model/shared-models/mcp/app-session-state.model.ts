@@ -1,0 +1,179 @@
+import { ObjectId } from 'mongodb';
+import { ConnectionState, ServerCapabilities } from '../connections/connection-state.model';
+import { PipelineBuilderState } from '../explorer/pipeline.model';
+import { ShellSessionState } from '../explorer/shell.model';
+import { McpMode } from './mcp-mode.model';
+import { ProposalSummary } from './proposal.model';
+
+/** A surface holding unsaved user work. */
+export type DirtySurface =
+    | 'documentEdits'
+    | 'pipelineBuilder'
+    | 'shellInput'
+    | 'connectionEditor';
+
+/** One region of unsaved user work, described in user-facing terms. */
+export interface DirtyRegion {
+    /** Which surface is dirty. */
+    surface: DirtySurface;
+
+    /** Plain-language description of what is unsaved. */
+    description: string;
+
+    /** How many items are pending, when countable. */
+    itemCount?: number;
+}
+
+/** Summary of the connection currently in use. */
+export interface ActiveConnectionSummary {
+    /** Identifier of the saved connection. */
+    connectionId: ObjectId;
+
+    /** Display name. */
+    name: string;
+
+    /** Current lifecycle state. */
+    state: ConnectionState;
+
+    /** Whether writes are forbidden through this connection. */
+    isReadOnly: boolean;
+
+    /** Detected server capabilities, once connected. */
+    serverCapabilities?: ServerCapabilities;
+}
+
+/** One open tab in the workspace. */
+export interface TabSummary {
+    /** Stable tab identifier. */
+    id: string;
+
+    /** What the tab shows. */
+    kind: 'collection' | 'pipeline' | 'shell' | 'indexes' | 'server-status';
+
+    /** Display title. */
+    title: string;
+
+    /** Connection the tab is bound to. */
+    connectionId?: ObjectId;
+
+    /** Target Database name, when applicable. */
+    databaseName?: string;
+
+    /** Collection name, when applicable. */
+    collectionName?: string;
+}
+
+/** The state of the collection view the user is looking at right now. */
+export interface CurrentViewState {
+    /** Connection being browsed. */
+    connectionId: ObjectId;
+
+    /** Target Database name. */
+    databaseName: string;
+
+    /** Collection name. */
+    collectionName: string;
+
+    /** Which registered view is active, for example 'table' or 'json'. */
+    viewId: string;
+
+    /** Active filter as Extended JSON text, when set. */
+    filter?: string;
+
+    /** Active projection as Extended JSON text, when set. */
+    projection?: string;
+
+    /** Active sort as Extended JSON text, when set. */
+    sort?: string;
+
+    /** Page size in effect. */
+    limit: number;
+
+    /** Documents skipped. */
+    skip: number;
+
+    /** How many documents are selected. */
+    selectedDocumentCount: number;
+
+    /** True when the visible page was capped or timed out. */
+    isPartial: boolean;
+
+    /** Whether the connection forbids writes. */
+    isReadOnlyConnection: boolean;
+}
+
+/**
+ * Server-side mirror of what the user is currently looking at. The client
+ * publishes this over the socket; MCP reads it. UI mutations travel the other way
+ * and are applied by the client's command dispatcher.
+ */
+export interface AppSessionState {
+    /** Whether a browser session is currently connected. */
+    hasActiveSession: boolean;
+
+    /** Current MCP permission mode. */
+    mcpMode: McpMode;
+
+    /** The connection in use, when any. */
+    activeConnection?: ActiveConnectionSummary;
+
+    /** Every open tab. */
+    openTabs: TabSummary[];
+
+    /** Which tab is focused. */
+    activeTabId?: string;
+
+    /** The collection view currently on screen, when one is. */
+    currentView?: CurrentViewState;
+
+    /** Aggregation builder state, when the builder is open. */
+    pipeline?: PipelineBuilderState;
+
+    /** Shell state, when the shell is open. */
+    shell?: ShellSessionState;
+
+    /** Proposals awaiting the user's decision. */
+    pendingProposals: ProposalSummary[];
+
+    /** Surfaces holding unsaved user work. */
+    dirtyRegions: DirtyRegion[];
+
+    /**
+     * Incremented on every change. Mutating tools may pass an expected revision;
+     * a mismatch is refused rather than applied against a stale view.
+     */
+    revision: number;
+}
+
+/** Who performed a logged action. */
+export type ActivityActor = 'user' | 'mcp' | 'system';
+
+/** One entry in the attribution log. */
+export interface ActivityEntry {
+    /** Stable identifier. */
+    id: string;
+
+    /** When it happened, as an ISO-8601 string. */
+    at: string;
+
+    /** Who did it. */
+    actor: ActivityActor;
+
+    /** Machine-readable action name, for example 'set_query'. */
+    action: string;
+
+    /** Plain-language description shown in the log. */
+    description: string;
+
+    /** Whether this entry can be undone. */
+    isUndoable: boolean;
+
+    /** Whether it has already been undone. */
+    isUndone: boolean;
+
+    /**
+     * State needed to reverse the action, as a JSON string. Interface state only —
+     * this is never used to reverse a Target Database write.
+     */
+    undoPayload?: string;
+}

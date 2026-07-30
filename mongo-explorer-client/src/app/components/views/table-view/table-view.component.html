@@ -1,0 +1,49 @@
+@let cols = columns();
+@let docs = documents();
+
+@if (docs.length === 0) {
+    <div class="state-block">
+        <i class="pi pi-inbox state-icon"></i>
+        <div>No documents to display.</div>
+    </div>
+} @else {
+    <div class="table-scroll scroll-x">
+        <table class="document-table">
+            <thead>
+                <tr>
+                    <th class="row-gutter"></th>
+                    @for (column of cols; track column.path) {
+                        <th [title]="columnTitle(column)">
+                            <span class="column-name truncate">{{ column.path }}</span>
+                            @if (isPartialColumn(column)) {
+                                <span class="column-partial tiny" title="This field is missing from some loaded documents.">
+                                    {{ column.presentCount }}/{{ column.sampleSize }}
+                                </span>
+                            }
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @for (document of docs; track rowKey(document)) {
+                    <tr [class.selected]="isSelected(document)" (click)="toggleRow(document, $event)">
+                        <td class="row-gutter">
+                            <button
+                                type="button"
+                                class="cell-action"
+                                title="Edit this document"
+                                (click)="editRequested.emit(document); $event.stopPropagation()">
+                                <i class="pi pi-pencil"></i>
+                            </button>
+                        </td>
+                        @for (column of cols; track column.path) {
+                            <td (contextmenu)="activateField(document, column.path, $event)">
+                                <app-cell-host [context]="cellContext(document, column.path)"></app-cell-host>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

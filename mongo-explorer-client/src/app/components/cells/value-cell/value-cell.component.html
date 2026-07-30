@@ -1,0 +1,17 @@
+@let ctx = context();
+
+<span class="value-cell" [class.long]="isLong()">
+    <span class="value-text truncate" [style.color]="colorVariable()" [title]="display()">{{ display() }}</span>
+
+    @if (showTypeBadge()) {
+        <span class="type-badge tiny" [title]="'BSON type: ' + ctx.bsonType">{{ ctx.bsonType }}</span>
+    }
+
+    <button
+        type="button"
+        class="cell-action copy-button"
+        [title]="'Copy ' + ctx.path"
+        (click)="copy($event)">
+        <i class="pi pi-copy"></i>
+    </button>
+</span>

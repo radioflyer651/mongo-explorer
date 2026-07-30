@@ -1,0 +1,116 @@
+<div class="shell-panel open-height">
+    <div class="shell-header no-shrink">
+        <i class="pi pi-terminal"></i>
+        <span class="small">Shell</span>
+        <span class="tier-badge tiny" title="Tier A runs structured commands over the application's existing connection, reusing its authentication.">
+            command runner
+        </span>
+        <span class="header-spacer"></span>
+        <button type="button" class="shell-action" title="Reload transcript" (click)="reload()">
+            <i class="pi pi-refresh"></i>
+        </button>
+        <button type="button" class="shell-action" title="Clear transcript" (click)="clear()">
+            <i class="pi pi-trash"></i>
+        </button>
+    </div>
+
+    <div class="transcript grow-scroll">
+        @if (entries().length === 0) {
+            <div class="state-block">
+                <i class="pi pi-terminal state-icon"></i>
+                <div class="small">No commands yet.</div>
+                <div class="tiny subtle">
+                    Tier A takes a command document, for example <code>{{ '{' }} "collStats": "orders" {{ '}' }}</code>.
+                </div>
+            </div>
+        }
+
+        @for (entry of entries(); track entry.id) {
+            <div class="entry" [class.ai-attributed]="isFromAi(entry)" [class]="'status-' + entry.status">
+                <div class="entry-header">
+                    @if (isFromAi(entry)) {
+                        <span class="ai-badge"><i class="pi pi-sparkles"></i> AI</span>
+                    }
+                    <span class="entry-database tiny subtle">{{ entry.databaseName }}</span>
+                    <span class="entry-classification tiny">{{ entry.classification }}</span>
+                    <span class="header-spacer"></span>
+                    @if (entry.durationMs !== undefined) {
+                        <span class="tiny subtle">{{ entry.durationMs }} ms</span>
+                    }
+                    <button type="button" class="shell-action" title="Recall this command" (click)="recall(entry)">
+                        <i class="pi pi-history"></i>
+                    </button>
+                </div>
+
+                <pre class="entry-input mono">{{ entry.input }}</pre>
+
+                @if (entry.status === 'refused') {
+                    <div class="entry-refusal small">
+                        <i class="pi pi-ban"></i> {{ entry.error }}
+                    </div>
+                } @else if (entry.status === 'failed') {
+                    <div class="entry-error small">
+                        <i class="pi pi-exclamation-triangle"></i> {{ entry.error }}
+                    </div>
+                } @else if (entry.status === 'pending') {
+                    <div class="entry-pending small">
+                        <i class="pi pi-spin pi-spinner"></i> Running…
+                    </div>
+                } @else if (entry.resultJson) {
+                    <pre class="entry-result scroll-x">{{ displayResult(entry) }}</pre>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="shell-input-area no-shrink">
+        @if (isAiAuthored()) {
+            <div class="ai-authored-note tiny">
+                <i class="pi pi-sparkles"></i>
+                An AI wrote this command. It has not been run — review it and press Run.
+            </div>
+        }
+
+        <div class="input-row">
+            <input
+                type="text"
+                class="database-input mono"
+                placeholder="database"
+                [ngModel]="databaseName()"
+                (ngModelChange)="databaseName.set($event)" />
+
+            <textarea
+                class="command-input mono"
+                rows="2"
+                spellcheck="false"
+                placeholder='{ "collStats": "orders" }'
+                [ngModel]="input()"
+                (ngModelChange)="setInput($event)"
+                (keydown.control.enter)="run()"></textarea>
+
+            <button
+                type="button"
+                class="run-button"
+                [class.is-disabled]="!hasConnection() || isRunning()"
+                [title]="hasConnection() ? 'Run (Ctrl+Enter)' : 'Open a connection first.'"
+                (click)="run()">
+                @if (isRunning()) {
+                    <i class="pi pi-spin pi-spinner"></i>
+                } @else {
+                    <i class="pi pi-play"></i>
+                }
+            </button>
+        </div>
+
+        <div class="classification-hint tiny" [class.writes]="classification() === 'write'"
+             [class.unknown]="classification() === 'unclassifiable'">
+            {{ classificationHint() }}
+        </div>
+
+        @if (lastError()) {
+            <div class="input-error tiny">
+                <i class="pi pi-exclamation-triangle"></i> {{ lastError() }}
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,129 @@
+@let entries = reviewed();
+
+<div class="proposals-panel open-height">
+    <div class="panel-header no-shrink">
+        <i class="pi pi-inbox"></i>
+        <span>Proposals</span>
+        @if (pendingCount() > 0) {
+            <span class="pending-badge">{{ pendingCount() }}</span>
+        }
+        <span class="header-spacer"></span>
+        <button type="button" class="icon-button" title="Reload" (click)="reload()">
+            <i class="pi pi-refresh"></i>
+        </button>
+    </div>
+
+    @if (lastError()) {
+        <div class="apply-error no-shrink">
+            <i class="pi pi-exclamation-triangle"></i>
+            <span>{{ lastError() }}</span>
+        </div>
+    }
+
+    <div class="grow-scroll">
+        @if (entries.length === 0) {
+            <div class="state-block">
+                <i class="pi pi-inbox state-icon"></i>
+                <div>No proposals.</div>
+                <div class="tiny subtle">
+                    When an AI suggests a data change it appears here as a diff for you to review.
+                    It cannot apply one itself.
+                </div>
+            </div>
+        } @else {
+            @for (entry of entries; track entry.proposal.id) {
+                <div class="proposal ai-attributed" [class.is-pending]="entry.proposal.status === 'pending'">
+                    <div class="proposal-header clickable" (click)="toggle(entry.proposal.id)">
+                        <i [class]="expandedId() === entry.proposal.id ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></i>
+                        <span class="ai-badge"><i class="pi pi-sparkles"></i> AI</span>
+                        <span class="proposal-summary truncate">{{ entry.proposal.summary }}</span>
+                        <span class="proposal-status tiny" [class]="'status-' + entry.proposal.status">
+                            {{ entry.proposal.status }}
+                        </span>
+                    </div>
+
+                    @if (expandedId() === entry.proposal.id) {
+                        <div class="proposal-body">
+                            <div class="proposal-field">
+                                <span class="field-label tiny">Why</span>
+                                <span class="field-text">{{ entry.proposal.rationale }}</span>
+                            </div>
+
+                            <div class="proposal-field">
+                                <span class="field-label tiny">Target</span>
+                                <span class="field-text mono">
+                                    {{ entry.proposal.databaseName }}@if (entry.proposal.collectionName) {.{{ entry.proposal.collectionName }}}
+                                </span>
+                            </div>
+
+                            <div class="proposal-field">
+                                <span class="field-label tiny">Affects</span>
+                                <span class="field-text">
+                                    @if (entry.proposal.affectedCount === undefined) {
+                                        <span class="danger-text">
+                                            The affected document count could not be determined.
+                                        </span>
+                                    } @else {
+                                        {{ entry.proposal.affectedCount }} document(s)
+                                    }
+                                </span>
+                            </div>
+
+                            <div class="proposal-field">
+                                <span class="field-label tiny">Undo</span>
+                                <span class="field-text">{{ entry.reversalText }}</span>
+                            </div>
+
+                            @for (line of entry.operationLines; track line.label) {
+                                <div class="operation-block">
+                                    <span class="field-label tiny">{{ line.label }}</span>
+                                    <pre class="operation-body scroll-x">{{ line.body }}</pre>
+                                </div>
+                            }
+
+                            @if (entry.requiresTypedConfirmation && entry.proposal.status === 'pending') {
+                                <div class="typed-confirmation">
+                                    <label class="tiny" [attr.for]="'confirm-' + entry.proposal.id">
+                                        Type <strong>{{ entry.proposal.collectionName }}</strong> to confirm this
+                                        operation.
+                                    </label>
+                                    <input
+                                        [id]="'confirm-' + entry.proposal.id"
+                                        type="text"
+                                        class="confirm-input mono"
+                                        [ngModel]="confirmationText()[entry.proposal.id]"
+                                        (ngModelChange)="setConfirmation(entry.proposal.id, $event)" />
+                                </div>
+                            }
+
+                            @if (entry.proposal.status === 'pending') {
+                                <div class="proposal-actions">
+                                    <button type="button" class="action reject" (click)="reject(entry)">
+                                        <i class="pi pi-times"></i> Reject
+                                    </button>
+                                    <button type="button" class="action copy" (click)="copyAsShell(entry)">
+                                        <i class="pi pi-copy"></i> Copy as command
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="action apply"
+                                        [class.is-disabled]="!canApply(entry)"
+                                        [attr.aria-disabled]="!canApply(entry)"
+                                        [title]="canApply(entry) ? 'Apply this change' : 'Type the collection name to confirm first.'"
+                                        (click)="apply(entry)">
+                                        <i class="pi pi-check"></i> Apply
+                                    </button>
+                                </div>
+                            } @else if (entry.proposal.staleReason) {
+                                <div class="stale-note tiny">
+                                    <i class="pi pi-exclamation-triangle"></i>
+                                    {{ entry.proposal.staleReason }} Ask for a fresh proposal.
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>

@@ -1,0 +1,9 @@
+<!-- Unconditional, so the container always exists for a view to be created into. -->
+<ng-container #viewOutlet></ng-container>
+
+@if (!component()) {
+    <div class="state-block">
+        <i class="pi pi-exclamation-triangle state-icon"></i>
+        <div>No registered view can present this collection.</div>
+    </div>
+}

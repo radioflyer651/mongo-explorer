@@ -1,0 +1,168 @@
+import { ObjectId } from 'mongodb';
+
+/**
+ * Which shell implementation executed an entry.
+ *
+ * Tier A runs structured commands over the application's existing LiveConnection,
+ * so it reuses the connection's authentication — including OIDC — and its
+ * commands are classifiable as read-only by name.
+ *
+ * Tier B is a real mongosh process. It cannot share our connection and its
+ * JavaScript cannot be statically classified, so it is never MCP-executable.
+ */
+export enum ShellTier {
+    /** Structured db.runCommand() over the existing LiveConnection. */
+    CommandRunner = 'command-runner',
+
+    /** Full mongosh. Not implemented in the initial release. */
+    Mongosh = 'mongosh',
+}
+
+/** How a submitted shell command was classified for safety purposes. */
+export enum ShellCommandClassification {
+    /** On the read-only allow-list. Safe to execute without user confirmation. */
+    ReadOnly = 'read-only',
+
+    /** A recognised command that writes. Requires a user to execute it. */
+    Write = 'write',
+
+    /**
+     * Not recognised. Refused rather than permitted — the list is an allow-list,
+     * never a deny-list.
+     */
+    Unclassifiable = 'unclassifiable',
+}
+
+/** A request to execute something in the shell. */
+export interface ShellExecuteRequest {
+    /** Which connection to run against. */
+    connectionId: ObjectId;
+
+    /** Database the command runs against. */
+    databaseName: string;
+
+    /** The raw input text the user or AI submitted. */
+    input: string;
+
+    /** Which tier to execute in. */
+    tier: ShellTier;
+
+    /** Time budget in milliseconds, clamped server-side. */
+    maxTimeMs?: number;
+}
+
+/** One entry in the shell transcript. */
+export interface ShellTranscriptEntry {
+    /** Stable identifier for the entry. */
+    id: string;
+
+    /** Which connection the command ran against. */
+    connectionId: ObjectId;
+
+    /** Database the command ran against. */
+    databaseName: string;
+
+    /** The submitted input text. */
+    input: string;
+
+    /** Which tier executed it. */
+    tier: ShellTier;
+
+    /** How the command was classified. */
+    classification: ShellCommandClassification;
+
+    /** Who submitted it. */
+    actor: 'user' | 'mcp';
+
+    /** When it was submitted, as an ISO-8601 string. */
+    submittedAt: string;
+
+    /** Result as Extended JSON, absent while running or on error. */
+    resultJson?: string;
+
+    /** Error text, already redacted, when the command failed. */
+    error?: string;
+
+    /** Wall-clock duration in milliseconds, once complete. */
+    durationMs?: number;
+
+    /** Current state of the entry. */
+    status: 'pending' | 'succeeded' | 'failed' | 'refused' | 'cancelled';
+}
+
+/** Live shell session state, mirrored into the MCP session state. */
+export interface ShellSessionState {
+    /** Which connection the shell is attached to. */
+    connectionId?: ObjectId;
+
+    /** Which database the shell is scoped to. */
+    databaseName?: string;
+
+    /** Which tier the shell is operating in. */
+    tier: ShellTier;
+
+    /** The current, unsubmitted input buffer. */
+    inputBuffer: string;
+
+    /** Recent transcript entries, newest last. */
+    entries: ShellTranscriptEntry[];
+
+    /** Whether the input buffer differs from what was last submitted. */
+    isDirty: boolean;
+}
+
+/**
+ * Commands permitted for direct execution without user confirmation. An
+ * allow-list: anything absent from it is refused, not permitted.
+ */
+export const READ_ONLY_SHELL_COMMANDS: readonly string[] = [
+    'aggregate',
+    'buildInfo',
+    'collStats',
+    'connectionStatus',
+    'count',
+    'dbStats',
+    'distinct',
+    'explain',
+    'find',
+    'getParameter',
+    'hello',
+    'hostInfo',
+    'isMaster',
+    'listCollections',
+    'listDatabases',
+    'listIndexes',
+    'ping',
+    'serverStatus',
+    'currentOp',
+    'validate',
+    'whatsmyuri',
+];
+
+/**
+ * Commands recognised as writes. Present so a write can be reported precisely
+ * rather than as merely unclassifiable.
+ */
+export const WRITE_SHELL_COMMANDS: readonly string[] = [
+    'insert',
+    'update',
+    'delete',
+    'findAndModify',
+    'create',
+    'createIndexes',
+    'drop',
+    'dropDatabase',
+    'dropIndexes',
+    'renameCollection',
+    'collMod',
+    'createUser',
+    'dropUser',
+    'updateUser',
+    'grantRolesToUser',
+    'revokeRolesFromUser',
+    'createRole',
+    'dropRole',
+    'killOp',
+    'compact',
+    'reIndex',
+];

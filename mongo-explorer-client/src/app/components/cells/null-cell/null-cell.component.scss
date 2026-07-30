@@ -1,0 +1,25 @@
+/* A null value reads as a literal; an absent field reads as an unfilled slot.
+   Two distinct visual treatments, because they are two distinct facts. */
+
+.null-cell {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-small);
+    font-style: italic;
+    color: var(--color-bson-null);
+}
+
+.absent-cell {
+    display: block;
+    min-width: 2rem;
+    min-height: 1rem;
+
+    /* A faint hatch, so an empty cell is visibly "nothing here" rather than blank. */
+    background-image: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 3px,
+        var(--color-bson-absent) 3px,
+        var(--color-bson-absent) 4px
+    );
+    opacity: 0.35;
+}

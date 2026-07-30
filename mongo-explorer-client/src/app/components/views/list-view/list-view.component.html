@@ -1,0 +1,36 @@
+@let items = entries();
+
+@if (items.length === 0) {
+    <div class="state-block">
+        <i class="pi pi-inbox state-icon"></i>
+        <div>No documents to display.</div>
+    </div>
+} @else {
+    <div class="list-container">
+        @for (entry of items; track entry.key) {
+            <div class="list-entry" [class.selected]="isSelected(entry)" (click)="select(entry)">
+                <div class="entry-header">
+                    <span class="tiny subtle">{{ entry.paths.length }} field(s)</span>
+                    <button
+                        type="button"
+                        class="cell-action"
+                        title="Edit this document"
+                        (click)="editRequested.emit(entry.document); $event.stopPropagation()">
+                        <i class="pi pi-pencil"></i>
+                    </button>
+                </div>
+
+                <dl class="field-list">
+                    @for (path of entry.paths; track path) {
+                        <div class="field-row" (contextmenu)="activateField(entry.document, path, $event)">
+                            <dt class="field-name truncate" [title]="path">{{ path }}</dt>
+                            <dd class="field-value">
+                                <app-cell-host [context]="cellContext(entry.document, path)"></app-cell-host>
+                            </dd>
+                        </div>
+                    }
+                </dl>
+            </div>
+        }
+    </div>
+}

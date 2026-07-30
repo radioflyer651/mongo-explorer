@@ -1,0 +1,50 @@
+{
+    // Press F5 with a client file focused: starts ng serve, waits until it is actually
+    // listening, then opens a browser with the debugger attached so breakpoints work
+    // directly in .ts files.
+    //
+    // The client needs the API. Start the server first with F5 in the server project,
+    // or use the "Mongo Explorer: server + client" compound in the workspace file.
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug client (Edge)",
+            "type": "msedge",
+            "request": "launch",
+            "url": "http://localhost:27100",
+            "webRoot": "${workspaceFolder}",
+            "preLaunchTask": "ng serve",
+            "sourceMaps": true,
+            "presentation": {
+                "group": "1-run",
+                "order": 1
+            }
+        },
+        {
+            "name": "Debug client (Chrome)",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:27100",
+            "webRoot": "${workspaceFolder}",
+            "preLaunchTask": "ng serve",
+            "sourceMaps": true,
+            "presentation": {
+                "group": "1-run",
+                "order": 2
+            }
+        },
+        {
+            // For when ng serve is already running in a terminal.
+            "name": "Open browser only (Edge)",
+            "type": "msedge",
+            "request": "launch",
+            "url": "http://localhost:27100",
+            "webRoot": "${workspaceFolder}",
+            "sourceMaps": true,
+            "presentation": {
+                "group": "2-attach",
+                "order": 1
+            }
+        }
+    ]
+}

@@ -1,0 +1,172 @@
+:host {
+    display: block;
+    height: 100%;
+    min-height: 0;
+}
+
+.proposals-panel {
+    background: var(--color-surface-panel);
+    border-left: 1px solid var(--color-border);
+
+    .header-spacer {
+        flex: 1 1 auto;
+    }
+
+    .pending-badge {
+        padding: 0 0.35rem;
+        border-radius: 999px;
+        background: var(--color-ai);
+        color: var(--color-text-inverse);
+        font-size: var(--font-size-tiny);
+    }
+
+    .icon-button {
+        padding: 0;
+        border: none;
+        background: transparent;
+        color: var(--color-text-muted);
+        cursor: pointer;
+
+        &:hover {
+            color: var(--color-brand-primary);
+        }
+    }
+}
+
+.apply-error {
+    display: flex;
+    align-items: center;
+    gap: var(--space-small);
+    padding: var(--space-small);
+    background: var(--color-danger-surface);
+    border-bottom: 1px solid var(--color-danger-border);
+    color: var(--color-danger);
+    font-size: var(--font-size-small);
+}
+
+.proposal {
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-raised);
+
+    &.is-pending {
+        background: var(--color-ai-surface);
+    }
+
+    .proposal-header {
+        display: flex;
+        align-items: center;
+        gap: var(--space-small);
+        padding: var(--space-small);
+    }
+
+    .proposal-summary {
+        flex: 1 1 auto;
+        font-size: var(--font-size-small);
+    }
+
+    .proposal-status {
+        padding: 0 0.3rem;
+        border-radius: var(--radius-small);
+        background: var(--color-surface-sunken);
+        color: var(--color-text-muted);
+
+        &.status-applied {
+            background: var(--color-success-surface);
+            color: var(--color-success);
+        }
+
+        &.status-stale,
+        &.status-rejected {
+            background: var(--color-warning-surface);
+            color: var(--color-warning);
+        }
+    }
+
+    .proposal-body {
+        padding: 0 var(--space-small) var(--space-small);
+    }
+
+    .proposal-field {
+        display: grid;
+        grid-template-columns: 4.5rem 1fr;
+        gap: var(--space-small);
+        padding: 0.15rem 0;
+    }
+
+    .field-label {
+        color: var(--color-text-subtle);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .field-text {
+        font-size: var(--font-size-small);
+    }
+
+    .operation-block {
+        margin-top: var(--space-small);
+    }
+
+    .operation-body {
+        margin: 0.15rem 0 0;
+        padding: var(--space-small);
+        max-height: 14rem;
+        overflow: auto;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-small);
+        background: var(--color-surface-sunken);
+    }
+
+    .typed-confirmation {
+        margin-top: var(--space-small);
+        padding: var(--space-small);
+        border: 1px solid var(--color-danger-border);
+        border-radius: var(--radius-small);
+        background: var(--color-danger-surface);
+
+        .confirm-input {
+            width: 100%;
+            margin-top: var(--space-tight);
+            padding: 0.25rem;
+            border: 1px solid var(--color-border-strong);
+            border-radius: var(--radius-small);
+        }
+    }
+
+    .proposal-actions {
+        display: flex;
+        gap: var(--space-small);
+        margin-top: var(--space-small);
+
+        .action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.25rem 0.5rem;
+            border: 1px solid var(--color-border-strong);
+            border-radius: var(--radius-small);
+            background: var(--color-surface-raised);
+            font-size: var(--font-size-small);
+            cursor: pointer;
+
+            &.apply {
+                border-color: var(--color-success);
+                color: var(--color-success);
+            }
+
+            &.reject {
+                color: var(--color-text-muted);
+            }
+
+            &.is-disabled {
+                opacity: 0.45;
+                cursor: not-allowed;
+            }
+        }
+    }
+
+    .stale-note {
+        margin-top: var(--space-small);
+        color: var(--color-warning);
+    }
+}

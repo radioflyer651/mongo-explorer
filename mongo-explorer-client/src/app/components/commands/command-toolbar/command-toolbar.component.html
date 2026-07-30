@@ -1,0 +1,17 @@
+<div class="command-toolbar">
+    @for (resolved of commands(); track resolved.command.id) {
+        <button
+            type="button"
+            class="toolbar-command"
+            [class.destructive]="resolved.command.isDestructive"
+            [class.is-disabled]="!resolved.enablement.enabled"
+            [title]="tooltipFor(resolved)"
+            [attr.aria-disabled]="!resolved.enablement.enabled"
+            (click)="invoke(resolved)">
+            <i [class]="resolved.command.icon"></i>
+            @if (showLabels()) {
+                <span class="command-label">{{ resolved.command.label }}</span>
+            }
+        </button>
+    }
+</div>

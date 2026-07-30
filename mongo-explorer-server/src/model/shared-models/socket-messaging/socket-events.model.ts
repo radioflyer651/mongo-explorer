@@ -1,0 +1,123 @@
+import { ObjectId } from 'mongodb';
+import { ConnectionStatus } from '../connections/connection-state.model';
+import { ActivityEntry, AppSessionState, CurrentViewState, DirtyRegion } from '../mcp/app-session-state.model';
+import { McpMode } from '../mcp/mcp-mode.model';
+import { ProposalSummary } from '../mcp/proposal.model';
+import { ShellTranscriptEntry } from '../explorer/shell.model';
+
+/* Client and server reference the same constants for event names, so there is no
+   string-literal drift between the two sides. */
+
+/** Server to client: a connection's lifecycle state changed. */
+export const CONNECTION_STATE_CHANGED = 'connection-state-changed';
+
+/** Message accompanying CONNECTION_STATE_CHANGED. */
+export interface ConnectionStateChangedMessage {
+    /** The connection's new status. */
+    status: ConnectionStatus;
+}
+
+/** Server to client: an interactive authentication prompt needs attention. */
+export const CONNECTION_INTERACTION_REQUIRED = 'connection-interaction-required';
+
+/** Client to server: publish the current interface state for the MCP mirror. */
+export const PUBLISH_SESSION_STATE = 'publish-session-state';
+
+/** Message accompanying PUBLISH_SESSION_STATE. */
+export interface PublishSessionStateMessage {
+    /** Which tabs are open and what is focused. */
+    openTabs: AppSessionState['openTabs'];
+
+    /** Which tab is focused. */
+    activeTabId?: string;
+
+    /** The collection view on screen, when any. */
+    currentView?: CurrentViewState;
+
+    /** Aggregation builder state, when open. */
+    pipeline?: AppSessionState['pipeline'];
+
+    /** Shell state, when open. */
+    shell?: AppSessionState['shell'];
+
+    /** Surfaces holding unsaved work. */
+    dirtyRegions: DirtyRegion[];
+
+    /** Identifier of the connection in use, when any. */
+    activeConnectionId?: ObjectId;
+}
+
+/** Server to client: apply an MCP-originated interface change. */
+export const APPLY_UI_MUTATION = 'apply-ui-mutation';
+
+/** Message accompanying APPLY_UI_MUTATION. */
+export interface ApplyUiMutationMessage {
+    /** Identifier so the client can acknowledge and the server can log it. */
+    mutationId: string;
+
+    /** Which registered command to dispatch. */
+    commandId: string;
+
+    /** Command arguments, as a JSON-serialisable object. */
+    args: Record<string, unknown>;
+
+    /** Plain-language description for the attribution badge. */
+    description: string;
+}
+
+/** Client to server: an MCP-originated interface change was applied or refused. */
+export const ACKNOWLEDGE_UI_MUTATION = 'acknowledge-ui-mutation';
+
+/** Message accompanying ACKNOWLEDGE_UI_MUTATION. */
+export interface AcknowledgeUiMutationMessage {
+    /** Which mutation is being acknowledged. */
+    mutationId: string;
+
+    /** Whether the client applied it. */
+    applied: boolean;
+
+    /** Why it was refused, when it was. */
+    error?: string;
+
+    /** State captured so the change can be undone. */
+    undoPayload?: string;
+}
+
+/** Server to client: the MCP permission mode changed. */
+export const MCP_MODE_CHANGED = 'mcp-mode-changed';
+
+/** Message accompanying MCP_MODE_CHANGED. */
+export interface McpModeChangedMessage {
+    /** The new mode. */
+    mode: McpMode;
+
+    /** Why it changed, for the activity log. */
+    reason: string;
+}
+
+/** Server to client: the pending proposal list changed. */
+export const PROPOSALS_CHANGED = 'proposals-changed';
+
+/** Message accompanying PROPOSALS_CHANGED. */
+export interface ProposalsChangedMessage {
+    /** The current pending proposals. */
+    proposals: ProposalSummary[];
+}
+
+/** Server to client: a shell entry was created or completed. */
+export const SHELL_ENTRY_CHANGED = 'shell-entry-changed';
+
+/** Message accompanying SHELL_ENTRY_CHANGED. */
+export interface ShellEntryChangedMessage {
+    /** The entry that changed. */
+    entry: ShellTranscriptEntry;
+}
+
+/** Server to client: an activity log entry was appended. */
+export const ACTIVITY_LOGGED = 'activity-logged';
+
+/** Message accompanying ACTIVITY_LOGGED. */
+export interface ActivityLoggedMessage {
+    /** The new entry. */
+    entry: ActivityEntry;
+}

@@ -1,0 +1,44 @@
+/* Button-specific shared rules. */
+
+.p-button:not(:first-child) {
+    margin-left: 0.5em;
+}
+
+.p-buttonset .p-button:not(:first-child) {
+    margin-left: 0;
+}
+
+/* Toolbar buttons are compact and icon-led. */
+.toolbar-button.p-button {
+    padding: 0.25rem 0.5rem;
+    margin-left: 0.25em;
+}
+
+/* Destructive commands are visually distinct wherever they appear. */
+.p-button.command-destructive {
+    color: var(--color-danger);
+}
+
+.p-button.command-destructive:not(:disabled):hover {
+    background: var(--color-danger-surface);
+    border-color: var(--color-danger-border);
+}
+
+/* A disabled control must still explain itself, so pointer events stay live for the
+   tooltip that carries the reason. */
+.p-button.p-disabled,
+.p-button:disabled {
+    pointer-events: auto;
+    cursor: not-allowed;
+}
+
+/* In-cell affordances sit quietly until the row is hovered. */
+.cell-action {
+    opacity: 0;
+    transition: opacity 0.12s ease-in-out;
+}
+
+tr:hover .cell-action,
+.cell-action:focus-visible {
+    opacity: 1;
+}

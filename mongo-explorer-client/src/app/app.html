@@ -1,0 +1,122 @@
+<div class="app-shell">
+    <header class="app-toolbar">
+        <span class="app-title">
+            <i class="pi pi-database"></i>
+            Mongo Explorer
+        </span>
+
+        <button type="button" class="toolbar-button" title="Add a connection" (click)="openEditor()">
+            <i class="pi pi-plus"></i>
+            <span class="small">Connection</span>
+        </button>
+
+        <app-command-toolbar
+            [context]="appContext"
+            [only]="toolbarCommands"
+            (commandFailed)="reportMessage($event)">
+        </app-command-toolbar>
+
+        <button type="button" class="toolbar-button" title="Open the aggregation pipeline builder" (click)="openPipeline()">
+            <i class="pi pi-sitemap"></i>
+            <span class="small">Pipeline</span>
+        </button>
+
+        <button
+            type="button"
+            class="toolbar-button"
+            [class.active]="isShellOpen()"
+            title="Toggle the Mongo shell"
+            (click)="toggleShell()">
+            <i class="pi pi-terminal"></i>
+            <span class="small">Shell</span>
+        </button>
+
+        <span class="toolbar-spacer"></span>
+
+        <button
+            type="button"
+            class="toolbar-button"
+            [class.has-pending]="pendingProposals() > 0"
+            title="Proposals — data changes an AI has suggested for you to review and execute"
+            (click)="toggleProposals()">
+            <i class="pi pi-inbox"></i>
+            <span class="small">Proposals</span>
+            @if (pendingProposals() > 0) {
+                <span class="pending-pill">{{ pendingProposals() }}</span>
+            }
+        </button>
+
+        <app-ai-mode-switch></app-ai-mode-switch>
+    </header>
+
+    @if (lastMessage()) {
+        <div class="message-bar">
+            <i class="pi pi-info-circle"></i>
+            <span class="small">{{ lastMessage() }}</span>
+            <span class="toolbar-spacer"></span>
+            <button type="button" class="icon-button" title="Dismiss" (click)="dismissMessage()">
+                <i class="pi pi-times"></i>
+            </button>
+        </div>
+    }
+
+    <div class="app-body">
+        <aside class="app-sidebar">
+            <app-explorer-sidebar></app-explorer-sidebar>
+        </aside>
+
+        <main class="app-main open-height">
+            <div class="tab-strip no-shrink">
+                @if (tabs().length === 0) {
+                    <span class="tab-empty tiny subtle">No open tabs</span>
+                }
+
+                @for (tab of tabs(); track tab.id) {
+                    <div class="tab" [class.active]="tab.id === workspace.activeTabId()" (click)="focusTab(tab.id)">
+                        <i [class]="tab.kind === 'collection' ? 'pi pi-table' : 'pi pi-sitemap'"></i>
+                        <span class="tab-title truncate">{{ tab.title }}</span>
+
+                        @if (tab.stagedEdits.length > 0) {
+                            <span class="tab-dirty" [title]="tab.stagedEdits.length + ' unapplied edit(s)'">&#9679;</span>
+                        }
+
+                        <button type="button" class="tab-close" title="Close tab" (click)="closeTab(tab.id, $event)">
+                            <i class="pi pi-times"></i>
+                        </button>
+                    </div>
+                }
+            </div>
+
+            <div class="tab-content grow-scroll">
+                @if (isPipelineTab()) {
+                    <app-pipeline-builder></app-pipeline-builder>
+                } @else {
+                    <app-collection-detail></app-collection-detail>
+                }
+            </div>
+
+            @if (isShellOpen()) {
+                <div class="shell-dock no-shrink">
+                    <app-shell-panel></app-shell-panel>
+                </div>
+            }
+        </main>
+
+        @if (isProposalsOpen()) {
+            <aside class="app-proposals">
+                <app-proposals-panel></app-proposals-panel>
+            </aside>
+        }
+    </div>
+</div>
+
+@if (isEditorOpen()) {
+    <app-connection-editor (closed)="closeEditor()"></app-connection-editor>
+}
+
+<app-command-menu
+    [context]="menuRequest()?.context"
+    [position]="menuRequest()?.position"
+    (closed)="closeMenu()"
+    (commandFailed)="reportMessage($event)">
+</app-command-menu>

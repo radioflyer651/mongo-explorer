@@ -1,0 +1,123 @@
+import { ObjectId } from 'mongodb';
+
+/**
+ * Lifecycle state of a live connection to a Target Database. Explicit and
+ * user-visible: guessing at connection health is how these tools become
+ * frustrating.
+ */
+export enum ConnectionState {
+    /** No connection attempt is in progress. */
+    Disconnected = 'disconnected',
+
+    /** Credentials are being resolved or acquired. */
+    Authenticating = 'authenticating',
+
+    /**
+     * The strategy needs something from the human — a device code, consent, or
+     * multi-factor approval. The state Compass's model has no room for.
+     */
+    AwaitingUserInteraction = 'awaiting-user-interaction',
+
+    /** Credentials are resolved and the driver is establishing a connection. */
+    Connecting = 'connecting',
+
+    /** Connected and usable. */
+    Connected = 'connected',
+
+    /** Connected, but the credential is close enough to expiry to warn about. */
+    CredentialExpiring = 'credential-expiring',
+
+    /** Reacquiring a credential without dropping the connection. */
+    Refreshing = 'refreshing',
+
+    /** The transport dropped and is being re-established. */
+    Reconnecting = 'reconnecting',
+
+    /** Authentication failed. Terminal until the user acts. */
+    AuthFailed = 'auth-failed',
+}
+
+/** A live connection's current status, as reported to the client. */
+export interface ConnectionStatus {
+    /** Identifier of the saved connection this status belongs to. */
+    connectionId: ObjectId;
+
+    /** Display name of the connection. */
+    connectionName: string;
+
+    /** Current lifecycle state. */
+    state: ConnectionState;
+
+    /** Human-readable detail of the current state. */
+    message?: string;
+
+    /** Error text when the state is AuthFailed, already redacted. */
+    error?: string;
+
+    /** Outstanding interaction the human must complete, when one exists. */
+    pendingInteraction?: InteractionPrompt;
+
+    /** When the credential expires, as an ISO-8601 string, when known. */
+    credentialExpiresAt?: string;
+
+    /** Whether this connection forbids writes. */
+    isReadOnly: boolean;
+
+    /** Server capabilities detected at connect time. */
+    serverCapabilities?: ServerCapabilities;
+}
+
+/**
+ * Something the strategy needs the human to do before authentication can
+ * complete. Interactive auth is the main path here, not an edge case.
+ */
+export interface InteractionPrompt {
+    /** Discriminates how the interface should present the prompt. */
+    kind: 'device-code' | 'consent-url' | 'passphrase' | 'password' | 'notice';
+
+    /** Short instruction shown to the user. */
+    message: string;
+
+    /** Verification URL for device-code and consent flows. */
+    url?: string;
+
+    /** Code the user must enter at the verification URL. */
+    userCode?: string;
+
+    /** When the prompt stops being valid, as an ISO-8601 string. */
+    expiresAt?: string;
+}
+
+/**
+ * Capabilities detected on connect. Feature detection beats a hard-coded
+ * compatibility matrix, because Cosmos vCore, Atlas, and self-hosted MongoDB
+ * differ in ways that change over time.
+ */
+export interface ServerCapabilities {
+    /** Reported server version string. */
+    version: string;
+
+    /** Best guess at the deployment family. */
+    deploymentKind: 'self-hosted' | 'atlas' | 'cosmos-vcore' | 'cosmos-ru' | 'unknown';
+
+    /** Whether aggregation with $out is available. */
+    supportsOut: boolean;
+
+    /** Whether aggregation with $merge is available. */
+    supportsMerge: boolean;
+
+    /** Whether transactions are available. */
+    supportsTransactions: boolean;
+
+    /** Whether collStats is permitted. */
+    supportsCollStats: boolean;
+
+    /** Whether currentOp is permitted. */
+    supportsCurrentOp: boolean;
+
+    /** Whether user and role administration commands are permitted. */
+    supportsUserManagement: boolean;
+
+    /** Commands that were probed and refused, for display in diagnostics. */
+    unavailableCommands: string[];
+}
